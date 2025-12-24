@@ -13,23 +13,6 @@
     String teacherName = (String) session.getAttribute("fullName");
     Integer teacherId = (Integer) session.getAttribute("userId");
     
-    // CRITICAL DEBUG - Check session
-    System.out.println("=== JSP SESSION DEBUG ===");
-    System.out.println("Session ID: " + session.getId());
-    System.out.println("User: " + session.getAttribute("user"));
-    System.out.println("Role: " + session.getAttribute("role"));
-    System.out.println("UserId: " + session.getAttribute("userId"));
-    System.out.println("FullName: " + session.getAttribute("fullName"));
-    System.out.println("TeacherId variable: " + teacherId);
-    System.out.println("========================");
-    
-    // FIX: Handle null teacherId
-    if (teacherId == null) {
-        System.err.println("❌ ERROR: teacherId is NULL in JSP!");
-        out.println("<script>alert('Session error - User ID not found. Please login again.'); window.location='login.jsp';</script>");
-        return;
-    }
-    
     // Get today's date
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String today = sdf.format(Calendar.getInstance().getTime());
