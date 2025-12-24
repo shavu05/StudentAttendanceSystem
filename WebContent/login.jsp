@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* [Keep all your existing CSS exactly as is - I'm only showing the changed parts below] */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
@@ -155,26 +156,6 @@
             line-height: 1.6;
         }
         
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .author-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        
-        /* Right Side - Login Form */
         .login-right {
             flex: 1;
             padding: 60px;
@@ -206,7 +187,6 @@
             font-size: 1rem;
         }
         
-        /* Role Selection */
         .role-selection {
             margin-bottom: 30px;
         }
@@ -248,35 +228,28 @@
             font-size: 0.8rem;
         }
         
-      /* Add this CSS to fix the admin icon size issue */
-
-/* Original role icon styling */
-.role-icon {
-    font-size: 2.2rem;
-    margin-bottom: 10px;
-    display: block;
-}
-
-/* FIXED: Make admin icon larger to match others */
-.role-option[data-role="admin"] .role-icon {
-    color: var(--danger);
-    font-size: 3.5rem; /* Increased from 2.2rem */
-    font-weight: 600; /* Added weight */
-}
-
-.role-option[data-role="teacher"] .role-icon {
-    color: var(--warning);
-    font-size: 2.2rem;
-}
-
-.role-option[data-role="student"] .role-icon {
-    color: var(--success);
-    font-size: 2.2rem;
-}
-
-/* Alternative: Use a different, bolder admin icon */
-/* Replace the admin icon in HTML from fa-user-shield to one of these: */
-        /* Form Styles - FIXED */
+        .role-icon {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .role-option[data-role="admin"] .role-icon {
+            color: var(--danger);
+            font-size: 3.5rem;
+            font-weight: 600;
+        }
+        
+        .role-option[data-role="teacher"] .role-icon {
+            color: var(--warning);
+            font-size: 2.2rem;
+        }
+        
+        .role-option[data-role="student"] .role-icon {
+            color: var(--success);
+            font-size: 2.2rem;
+        }
+        
         .form-group {
             margin-bottom: 25px;
         }
@@ -309,7 +282,6 @@
             box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
         }
         
-        /* Password toggle button INSIDE input */
         .password-toggle {
             position: absolute;
             right: 15px;
@@ -329,7 +301,6 @@
             color: var(--primary);
         }
         
-        /* Login Button */
         .btn-login {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
@@ -353,46 +324,40 @@
             color: white;
         }
         
-        /* Divider - REMOVED SOCIAL LOGIN */
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 30px 0;
-            color: var(--gray);
-        }
-        
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--light-gray);
-        }
-        
-        .divider span {
-            padding: 0 15px;
-        }
-        
-        /* Alert Messages */
+        /* FIXED: Alert message styles with shake animation */
         .alert-message {
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             gap: 12px;
-            animation: slideInDown 0.5s ease;
+            animation: slideInDown 0.5s ease, shake 0.5s ease 0.5s;
+            font-size: 0.95rem;
         }
         
         .alert-error {
             background: rgba(247, 37, 133, 0.1);
             border-left: 4px solid var(--danger);
             color: #d90429;
+            border: 1px solid rgba(247, 37, 133, 0.3);
+        }
+        
+        .alert-error i {
+            color: var(--danger);
+            font-size: 1.3rem;
         }
         
         .alert-success {
             background: rgba(76, 201, 240, 0.1);
             border-left: 4px solid var(--success);
             color: #118ab2;
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        .alert-success i {
+            color: var(--success);
+            font-size: 1.3rem;
         }
         
         @keyframes slideInDown {
@@ -406,7 +371,12 @@
             }
         }
         
-        /* Form Options */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
         .form-options {
             display: flex;
             justify-content: space-between;
@@ -442,7 +412,6 @@
             text-decoration: underline;
         }
         
-        /* Back to Home */
         .back-home {
             text-align: center;
             margin-top: 30px;
@@ -463,7 +432,6 @@
             color: var(--primary);
         }
         
-        /* Create Account Link */
         .create-account {
             text-align: center;
             margin-top: 20px;
@@ -487,7 +455,6 @@
             text-decoration: underline;
         }
         
-        /* Responsive Design */
         @media (max-width: 992px) {
             .login-wrapper {
                 flex-direction: column;
@@ -537,9 +504,7 @@
                     EduTrack Pro
                 </div>
                 
-                <h1 class="welcome-title">
-                    Welcome Back
-                </h1>
+                <h1 class="welcome-title">Welcome Back</h1>
                 
                 <p class="welcome-subtitle">
                     Sign in to access your personalized dashboard and manage student attendance 
@@ -563,14 +528,12 @@
                             <strong>Real-time Analytics:</strong> Instant insights and attendance tracking
                         </div>
                     </li>
-                   
                 </ul>
                 
                 <div class="testimonial">
                     <p class="testimonial-text">
                         "EduTrack Pro has simplified our attendance management. The interface is intuitive and reports are generated automatically."
                     </p>
-                   
                 </div>
             </div>
         </div>
@@ -583,12 +546,27 @@
                     <p class="login-subtitle">Enter your credentials to access the dashboard</p>
                 </div>
                 
-                <!-- Alert Messages -->
+                <!-- FIXED: Alert Messages - Check both parameters AND attributes -->
                 <% 
+                    // Check for error in request parameter (from URL) OR request attribute (from forward)
                     String error = request.getParameter("error");
-                    String success = request.getParameter("success");
+                    if (error == null || error.isEmpty()) {
+                        error = (String) request.getAttribute("error");
+                    }
                     
-                    if(error != null && !error.isEmpty()) {
+                    // Check for success message
+                    String success = request.getParameter("success");
+                    if (success == null || success.isEmpty()) {
+                        success = (String) request.getAttribute("success");
+                    }
+                    
+                    String message = request.getParameter("message");
+                    if (message == null || message.isEmpty()) {
+                        message = (String) request.getAttribute("message");
+                    }
+                    
+                    // Display error message
+                    if (error != null && !error.isEmpty()) {
                 %>
                     <div class="alert-message alert-error">
                         <i class="fas fa-exclamation-circle"></i>
@@ -596,10 +574,18 @@
                     </div>
                 <% } %>
                 
-                <% if(success != null && !success.isEmpty()) { %>
+                <% 
+                    // Display success/message
+                    if (success != null && !success.isEmpty()) { 
+                %>
                     <div class="alert-message alert-success">
                         <i class="fas fa-check-circle"></i>
                         <div><%= success %></div>
+                    </div>
+                <% } else if (message != null && !message.isEmpty()) { %>
+                    <div class="alert-message alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        <div><%= message %></div>
                     </div>
                 <% } %>
                 
@@ -633,17 +619,19 @@
                 </div>
                 
                 <!-- Login Form -->
-                 <form id="loginForm" action="login" method="post">  <!-- CHANGED: LoginServlet → login -->
+                <form id="loginForm" action="login" method="post">
                     <!-- Username Field -->
                     <div class="form-group">
                         <label for="username" class="form-label">
                             <i class="fas fa-user"></i> Username or Email
                         </label>
                         <input type="text" class="form-control" id="username" name="username" 
-                               placeholder="Enter your username or email" required>
+                               placeholder="Enter your username or email" 
+                               value="<%= request.getAttribute("username") != null ? request.getAttribute("username") : "" %>"
+                               required>
                     </div>
                     
-                    <!-- Password Field with INSIDE toggle button -->
+                    <!-- Password Field -->
                     <div class="form-group">
                         <label for="password" class="form-label">
                             <i class="fas fa-lock"></i> Password
@@ -651,20 +639,15 @@
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password" 
                                    placeholder="Enter your password" required>
-                            <button type="button" class="password-toggle" id="togglePassword">
+                            <button type="button" class="password-toggle" id="togglePassword" title="Show password">
                                 <i class="far fa-eye"></i>
                             </button>
                         </div>
                     </div>
                     
-                    <!-- Form Options - Remember me & Forgot password -->
+                    <!-- Form Options -->
                     <div class="form-options">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-                            <label class="form-check-label" for="rememberMe">
-                                Remember me
-                            </label>
-                        </div>
+                       
                         <a href="#forgotPassword" class="forgot-password" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
                             <i class="fas fa-key me-1"></i> Forgot Password?
                         </a>
@@ -677,9 +660,6 @@
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
                 </form>
-                
-                <!-- Create Account Link -->
-              
                 
                 <!-- Back to Home -->
                 <div class="back-home">
@@ -706,45 +686,17 @@
                         <i class="fas fa-info-circle me-2"></i>
                         For security reasons, password reset must be initiated by the administrator.
                     </div>
-                    <div class="text-center mt-3">
-                        <a href="mailto:admin@edutrackpro.com" class="btn btn-primary">
-                            <i class="fas fa-envelope me-2"></i> Contact Administrator
-                        </a>
-                    </div>
+                   
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Contact Admin Modal -->
-    <div class="modal fade" id="contactAdminModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Request Account</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>To create a new account, please contact your system administrator.</p>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Only administrators can create new user accounts in the system.
-                    </div>
-                    <div class="text-center mt-3">
-                        <a href="mailto:admin@edutrackpro.com" class="btn btn-primary">
-                            <i class="fas fa-envelope me-2"></i> Email Administrator
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Bootstrap JS Bundle with Popper -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Password visibility toggle - FIXED
+        // Password visibility toggle
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
             const icon = this.querySelector('i');
@@ -767,20 +719,31 @@
         const formRoleInput = document.getElementById('formRole');
         const selectedRoleInput = document.getElementById('selectedRole');
         
+        // Pre-select role if coming back from failed login
+        <% 
+            String preselectedRole = (String) request.getAttribute("role");
+            if (preselectedRole != null && !preselectedRole.isEmpty()) {
+        %>
+            const preselectedRole = '<%= preselectedRole %>';
+            roleOptions.forEach(opt => {
+                if (opt.getAttribute('data-role') === preselectedRole) {
+                    roleOptions.forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                    formRoleInput.value = preselectedRole;
+                    selectedRoleInput.value = preselectedRole;
+                }
+            });
+        <% } %>
+        
         roleOptions.forEach(option => {
             option.addEventListener('click', function() {
-                // Remove active class from all options
                 roleOptions.forEach(opt => opt.classList.remove('active'));
-                
-                // Add active class to clicked option
                 this.classList.add('active');
                 
-                // Update hidden inputs
                 const role = this.getAttribute('data-role');
                 formRoleInput.value = role;
                 selectedRoleInput.value = role;
                 
-                // Update form placeholders based on role
                 const usernameInput = document.getElementById('username');
                 if (role === 'student') {
                     usernameInput.placeholder = "Enter your student ID or email";
@@ -792,81 +755,10 @@
             });
         });
         
-        // Form validation
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            
-            if (!username || !password) {
-                e.preventDefault();
-                showAlert('Please fill in all required fields.', 'error');
-                return false;
-            }
-            
-            if (password.length < 6) {
-                e.preventDefault();
-                showAlert('Password must be at least 6 characters long.', 'error');
-                return false;
-            }
-            
-            return true;
-        });
-        
-        function showAlert(message, type) {
-            // Create alert element
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert-message alert-${type}`;
-            
-            // Choose icon based on type
-            const iconClass = type === 'error' ? 'exclamation-circle' : 'check-circle';
-            
-            alertDiv.innerHTML = `
-                <i class="fas fa-${iconClass}"></i>
-                <div>${message}</div>
-            `;
-            
-            // Insert alert before form
-            const loginContainer = document.querySelector('.login-container');
-            const form = document.getElementById('loginForm');
-            loginContainer.insertBefore(alertDiv, form);
-            
-            // Remove alert after 5 seconds
-            setTimeout(() => {
-                alertDiv.style.opacity = '0';
-                setTimeout(() => alertDiv.remove(), 300);
-            }, 5000);
-        }
-        
-        // Auto-focus on username field
+        // Auto-focus username on page load
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('username').focus();
         });
-        
-        // Contact admin link
-        document.querySelector('.create-account a').addEventListener('click', function(e) {
-            e.preventDefault();
-            const contactModal = new bootstrap.Modal(document.getElementById('contactAdminModal'));
-            contactModal.show();
-        });
-        
-        // Enter key submits form
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
-                const loginButton = document.getElementById('loginButton');
-                if (loginButton) {
-                    loginButton.click();
-                }
-            }
-        });
     </script>
-    <!-- Footer Credit -->
-    <div class="text-center mt-4" style="color: rgba(255,255,255,0.8);">
-        <p class="mb-0">
-            <i class="fas fa-code"></i> 
-            Created & Maintained by <strong>Shravani Sanika</strong>
-        </p>
-    </div>
-</body>
-
 </body>
 </html>
