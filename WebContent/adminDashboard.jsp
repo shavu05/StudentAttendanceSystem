@@ -1,3 +1,5 @@
+
+
 <%@ page import="com.attendance.model.User" %>
 <%@ page import="com.attendance.dao.UserDAO" %>
 <%@ page import="java.util.List" %>
@@ -2083,1146 +2085,644 @@
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    // ========== GLOBAL VARIABLES ==========
-    let currentUserId = null;
-    
-    // ========== INITIALIZATION ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize all tables
-        initializeTable('admin');
-        initializeTable('teacher');
-        initializeTable('student');
-        initializeTable('all-users');
-        
-        // Show dashboard by default
-        showSection('dashboard');
-        
-        // Show success/error messages if any
-        <% if (successMsg != null) { %>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '<%= successMsg %>',
-                timer: 3000
-            });
-        <% } %>
-        
-        <% if (errorMsg != null) { %>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: '<%= errorMsg %>',
-                timer: 3000
-            });
-        <% } %>
-        
-        // Setup form submissions
-        setupFormSubmissions();
-        
-        // Adjust navigation for mobile
-        adjustNavigationForMobile();
-        window.addEventListener('resize', adjustNavigationForMobile);
-    });
-    
-    // ========== SETUP FORM SUBMISSIONS ==========
-    function setupFormSubmissions() {
-        // Add User Form
-        document.getElementById('addUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addUser();
-        });
-        
-        // Edit User Form
-        document.getElementById('editUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            updateUser();
-        });
-    }
-    
-    // ========== TABLE FILTERING & SEARCH FUNCTIONS ==========
-    
-    // Store current table state
-    const tableState = {
-        'admin': {
-            currentPage: 1,
-            pageSize: 10,
-            filteredRows: [],
-            totalRows: 0,
-            searchTerm: '',
-            statusFilter: 'all',
-            sortBy: 'id'
-        },
-        'teacher': {
-            currentPage: 1,
-            pageSize: 10,
-            filteredRows: [],
-            totalRows: 0,
-            searchTerm: '',
-            statusFilter: 'all',
-            deptFilter: 'all',
-            sortBy: 'id'
-        },
-        'student': {
-            currentPage: 1,
-            pageSize: 10,
-            filteredRows: [],
-            totalRows: 0,
-            searchTerm: '',
-            statusFilter: 'all',
-            deptFilter: 'all',
-            classFilter: 'all',
-            sortBy: 'id'
-        },
-        'all-users': {
-            currentPage: 1,
-            pageSize: 10,
-            filteredRows: [],
-            totalRows: 0,
-            searchTerm: '',
-            roleFilter: 'all',
-            statusFilter: 'all',
-            sortBy: 'id'
-        }
-    };
-    
-    function initializeTable(tableType) {
-        const tableBody = document.getElementById(tableType + 'TableBody');
-        if (!tableBody) return;
-        
-        // Get all rows
-        const rows = Array.from(tableBody.querySelectorAll('tr'));
-        tableState[tableType].totalRows = rows.length;
-        tableState[tableType].filteredRows = rows;
-        
-        // Apply initial filtering
-        filterTable(tableType);
-    }
-    
-    function filterTable(tableType) {
-        const state = tableState[tableType];
-        const searchInput = document.getElementById(tableType + 'Search');
-        const statusFilter = document.getElementById(tableType + 'StatusFilter');
-        const deptFilter = document.getElementById(tableType + 'DeptFilter');
-        const classFilter = document.getElementById(tableType + 'ClassFilter');
-        const roleFilter = document.getElementById(tableType + 'RoleFilter');
-        const tableBody = document.getElementById(tableType + 'TableBody');
-        const noResults = document.getElementById(tableType + 'NoResults');
-        const showingCount = document.getElementById(tableType + 'ShowingCount');
-        const totalCount = document.getElementById(tableType + 'TotalCount');
-        
-        // Update state
-        state.searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        state.statusFilter = statusFilter ? statusFilter.value : 'all';
-        state.deptFilter = deptFilter ? deptFilter.value : 'all';
-        state.classFilter = classFilter ? classFilter.value : 'all';
-        state.roleFilter = roleFilter ? roleFilter.value : 'all';
-        state.currentPage = 1;
-        
-        // Get all rows
-        const rows = Array.from(tableBody.querySelectorAll('tr'));
-        
-        // Filter rows
-        state.filteredRows = rows.filter(row => {
-            // Search filter
-            const searchFields = ['name', 'username', 'email', 'phone', 'department', 'subjects', 'rollno', 'class'];
-            let matchesSearch = false;
-            
-            if (!state.searchTerm) {
-                matchesSearch = true;
-            } else {
-                for (const field of searchFields) {
-                    const value = row.getAttribute('data-' + field) || '';
-                    if (value.includes(state.searchTerm)) {
-                        matchesSearch = true;
-                        break;
-                    }
-                }
-            }
-            
-            // Status filter
-            const status = row.getAttribute('data-status');
-            let matchesStatus = state.statusFilter === 'all' || status === state.statusFilter;
-            
-            // Department filter
-            let matchesDept = true;
-            if (tableType === 'teacher' || tableType === 'student' || tableType === 'all-users') {
-                const dept = row.getAttribute('data-department') || '';
-                matchesDept = state.deptFilter === 'all' || dept === state.deptFilter.toLowerCase();
-            }
-            
-            // Class filter
-            let matchesClass = true;
-            if (tableType === 'student') {
-                const className = row.getAttribute('data-class') || '';
-                matchesClass = state.classFilter === 'all' || className === state.classFilter.toLowerCase();
-            }
-            
-            // Role filter
-            let matchesRole = true;
-            if (tableType === 'all-users') {
-                const role = row.getAttribute('data-role');
-                matchesRole = state.roleFilter === 'all' || role === state.roleFilter;
-            }
-            
-            return matchesSearch && matchesStatus && matchesDept && matchesClass && matchesRole;
-        });
-        
-        // Sort rows
-        sortRows(tableType);
-        
-        // Update display
-        updateTableDisplay(tableType);
-    }
-    
-    function sortTable(tableType) {
-        const sortBy = document.getElementById(tableType + 'SortBy').value;
-        tableState[tableType].sortBy = sortBy;
-        sortRows(tableType);
-        updateTableDisplay(tableType);
-    }
-    
-    function sortRows(tableType) {
-        const state = tableState[tableType];
-        
-        state.filteredRows.sort((a, b) => {
-            switch(state.sortBy) {
-                case 'id':
-                    return parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id'));
-                case 'name':
-                    return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
-                case 'name_desc':
-                    return b.getAttribute('data-name').localeCompare(a.getAttribute('data-name'));
-                case 'username':
-                    return a.getAttribute('data-username').localeCompare(b.getAttribute('data-username'));
-                case 'email':
-                    return a.getAttribute('data-email').localeCompare(b.getAttribute('data-email'));
-                case 'dept':
-                    return (a.getAttribute('data-department') || '').localeCompare(b.getAttribute('data-department') || '');
-                case 'role':
-                    return a.getAttribute('data-role').localeCompare(b.getAttribute('data-role'));
-                default:
-                    return 0;
-            }
-        });
-    }
-    
-    function updateTableDisplay(tableType) {
-        const state = tableState[tableType];
-        const tableBody = document.getElementById(tableType + 'TableBody');
-        const noResults = document.getElementById(tableType + 'NoResults');
-        const showingCount = document.getElementById(tableType + 'ShowingCount');
-        const totalCount = document.getElementById(tableType + 'TotalCount');
-        const pagination = document.getElementById(tableType + 'Pagination');
-        
-        // Hide all rows first
-        const allRows = tableBody.querySelectorAll('tr');
-        allRows.forEach(row => row.style.display = 'none');
-        
-        // Calculate pagination
-        const totalPages = Math.ceil(state.filteredRows.length / state.pageSize);
-        const startIndex = (state.currentPage - 1) * state.pageSize;
-        const endIndex = Math.min(startIndex + state.pageSize, state.filteredRows.length);
-        
-        // Show rows for current page
-        for (let i = startIndex; i < endIndex; i++) {
-            if (state.filteredRows[i]) {
-                state.filteredRows[i].style.display = '';
-            }
-        }
-        
-        // Update counts
-        if (showingCount) showingCount.textContent = state.filteredRows.length;
-        if (totalCount) totalCount.textContent = state.totalRows;
-        
-        // Show/hide no results message
-        if (noResults) {
-            if (state.filteredRows.length === 0) {
-                noResults.style.display = 'block';
-                tableBody.style.display = 'none';
-            } else {
-                noResults.style.display = 'none';
-                tableBody.style.display = '';
-            }
-        }
-        
-        // Update pagination
-        updatePagination(tableType);
-    }
-    
-    function updatePagination(tableType) {
-        const state = tableState[tableType];
-        const pageSizeSelect = document.getElementById(tableType + 'PageSize');
-        const pagination = document.getElementById(tableType + 'Pagination');
-        
-        if (pageSizeSelect) {
-            state.pageSize = parseInt(pageSizeSelect.value);
-        }
-        
-        const totalPages = Math.ceil(state.filteredRows.length / state.pageSize);
-        state.currentPage = Math.min(state.currentPage, totalPages || 1);
-        
-        if (pagination && totalPages > 1) {
-            let paginationHTML = '';
-            
-            // Previous button
-            paginationHTML += '<li class="page-item ' + (state.currentPage == 1 ? 'disabled' : '') + '">';
-            paginationHTML += '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + (state.currentPage - 1) + ')">&laquo;</a>';
-            paginationHTML += '</li>';
-            
-            // Page numbers
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, state.currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                paginationHTML += '<li class="page-item ' + (i == state.currentPage ? 'active' : '') + '">';
-                paginationHTML += '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + i + ')">' + i + '</a>';
-                paginationHTML += '</li>';
-            }
-            
-            // Next button
-            paginationHTML += '<li class="page-item ' + (state.currentPage == totalPages ? 'disabled' : '') + '">';
-            paginationHTML += '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + (state.currentPage + 1) + ')">&raquo;</a>';
-            paginationHTML += '</li>';
-            
-            pagination.querySelector('ul').innerHTML = paginationHTML;
-            pagination.style.display = 'block';
-        } else if (pagination) {
-            pagination.style.display = 'none';
-        }
-        
-        updateTableDisplay(tableType);
-    }
-    
-    function changePage(tableType, page) {
-        const state = tableState[tableType];
-        state.currentPage = page;
-        updateTableDisplay(tableType);
-    }
-    
-    function clearFilters(tableType) {
-        // Reset search input
-        const searchInput = document.getElementById(tableType + 'Search');
-        if (searchInput) searchInput.value = '';
-        
-        // Reset filters
-        const filters = ['StatusFilter', 'DeptFilter', 'ClassFilter', 'RoleFilter', 'SortBy'];
-        filters.forEach(filter => {
-            const element = document.getElementById(tableType + filter);
-            if (element) {
-                if (filter === 'SortBy') {
-                    element.value = 'id';
-                } else {
-                    element.value = 'all';
-                }
-            }
-        });
-        
-        // Reset page size
-        const pageSize = document.getElementById(tableType + 'PageSize');
-        if (pageSize) pageSize.value = '10';
-        
-        // Reapply filters
-        filterTable(tableType);
-    }
-    
-    // ========== EXPORT FUNCTIONS (FIXED) ==========
-// ========== EXPORT FUNCTIONS (FIXED FOR ALL TABLES) ==========
-function exportToExcel(tableType) {
-    const tableId = tableType + 'TableBody';
-    const table = document.getElementById(tableId);
-    
-    if (!table) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'No Table',
-            text: 'Table not found.',
-            timer: 2000
-        });
-        return;
-    }
-    
-    // Get all visible rows (not filtered by pagination)
-    const allRows = table.querySelectorAll('tr');
-    const visibleRows = Array.from(allRows).filter(row => row.style.display !== 'none');
-    
-    if (visibleRows.length === 0) {
-        // If no visible rows, try to get all rows from tableState
-        const rows = tableState[tableType] ? tableState[tableType].filteredRows : [];
-        if (rows.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No Data',
-                text: 'There is no data to export.',
-                timer: 2000
-            });
-            return;
-        }
-        exportFilteredRows(tableType, rows);
-        return;
-    }
-    
-    exportVisibleRows(tableType, visibleRows);
+<script>/* ========================================
+EDUTRACK PRO - ADMIN DASHBOARD JAVASCRIPT
+Version: 1.0.0 - Eclipse/JSP Compatible
+No ES6 Syntax - Pure JavaScript
+======================================== */
+
+var currentUserId = null;
+var tableState = {
+ 'admin': { currentPage: 1, pageSize: 10, filteredRows: [], totalRows: 0, searchTerm: '', statusFilter: 'all', sortBy: 'id' },
+ 'teacher': { currentPage: 1, pageSize: 10, filteredRows: [], totalRows: 0, searchTerm: '', statusFilter: 'all', deptFilter: 'all', sortBy: 'id' },
+ 'student': { currentPage: 1, pageSize: 10, filteredRows: [], totalRows: 0, searchTerm: '', statusFilter: 'all', deptFilter: 'all', classFilter: 'all', sortBy: 'id' },
+ 'all-users': { currentPage: 1, pageSize: 10, filteredRows: [], totalRows: 0, searchTerm: '', roleFilter: 'all', statusFilter: 'all', sortBy: 'id' }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+ initializeAll();
+});
+
+function initializeAll() {
+ initializeTable('admin');
+ initializeTable('teacher');
+ initializeTable('student');
+ initializeTable('all-users');
+ showSection('dashboard');
+ setupFormHandlers();
+ setupMobileMenu();
+ adjustNavigationForMobile();
+ window.addEventListener('resize', adjustNavigationForMobile);
 }
 
-function exportVisibleRows(tableType, visibleRows) {
-    // Get table headers (excluding Actions column)
-    const table = document.getElementById(tableType + 'TableBody').closest('table');
-    const headers = Array.from(table.querySelectorAll('thead th')).map(th => {
-        return th.textContent.trim();
-    }).filter(header => header !== 'Actions' && header !== '');
-    
-    let csvContent = '';
-    
-    // Add headers
-    csvContent += headers.join(',') + '\n';
-    
-    // Add data rows
-    visibleRows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td'));
-        const rowData = [];
-        
-        // Process each cell (skip actions column)
-        for (let i = 0; i < cells.length - 1; i++) {
-            const cell = cells[i];
-            let cellText = cell.textContent.trim();
-            
-            // Clean up badge text
-            const badges = cell.querySelectorAll('.badge');
-            if (badges.length > 0) {
-                cellText = Array.from(badges).map(badge => badge.textContent.trim()).join(', ');
-            }
-            
-            // Handle commas and quotes in CSV
-            if (cellText.includes(',') || cellText.includes('"') || cellText.includes('\n')) {
-                cellText = '"' + cellText.replace(/"/g, '""') + '"';
-            }
-            
-            rowData.push(cellText);
-        }
-        
-        csvContent += rowData.join(',') + '\n';
-    });
-    
-    downloadCSV(csvContent, tableType);
+function setupFormHandlers() {
+ document.getElementById('addUserForm').addEventListener('submit', function(e) {
+     e.preventDefault();
+     addUser();
+ });
+ 
+ document.getElementById('editUserForm').addEventListener('submit', function(e) {
+     e.preventDefault();
+     updateUser();
+ });
+ 
+ document.getElementById('editIsActive').addEventListener('change', function() {
+     document.getElementById('statusText').textContent = this.checked ? 'Active' : 'Inactive';
+ });
 }
 
-function exportFilteredRows(tableType, rows) {
-    // Get table headers (excluding Actions column)
-    const table = document.getElementById(tableType + 'TableBody').closest('table');
-    const headers = Array.from(table.querySelectorAll('thead th')).map(th => {
-        return th.textContent.trim();
-    }).filter(header => header !== 'Actions' && header !== '');
-    
-    let csvContent = '';
-    
-    // Add headers
-    csvContent += headers.join(',') + '\n';
-    
-    // Add data rows
-    rows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td'));
-        const rowData = [];
-        
-        // Process each cell (skip actions column)
-        for (let i = 0; i < cells.length - 1; i++) {
-            const cell = cells[i];
-            let cellText = cell.textContent.trim();
-            
-            // Clean up badge text
-            const badges = cell.querySelectorAll('.badge');
-            if (badges.length > 0) {
-                cellText = Array.from(badges).map(badge => badge.textContent.trim()).join(', ');
-            }
-            
-            // Handle commas and quotes in CSV
-            if (cellText.includes(',') || cellText.includes('"') || cellText.includes('\n')) {
-                cellText = '"' + cellText.replace(/"/g, '""') + '"';
-            }
-            
-            rowData.push(cellText);
-        }
-        
-        csvContent += rowData.join(',') + '\n';
-    });
-    
-    downloadCSV(csvContent, tableType);
+function setupMobileMenu() {
+ var menuToggle = document.getElementById('menuToggle');
+ var sidebar = document.querySelector('.sidebar');
+ 
+ if (menuToggle && sidebar) {
+     menuToggle.addEventListener('click', function(e) {
+         e.stopPropagation();
+         sidebar.classList.toggle('active');
+     });
+     
+     document.addEventListener('click', function(event) {
+         if (window.innerWidth <= 992 && sidebar.classList.contains('active') && 
+             !sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+             sidebar.classList.remove('active');
+         }
+     });
+ }
 }
 
-function downloadCSV(csvContent, tableType) {
-    // Create and download CSV file
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    const filename = tableType + '_users_' + new Date().toISOString().slice(0, 10) + '.csv';
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Clean up
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-    
-    Swal.fire({
-        icon: 'success',
-        title: 'Exported!',
-        text: 'Data exported successfully to ' + filename,
-        timer: 2000
-    });
+function initializeTable(tableType) {
+ var tableBody = document.getElementById(tableType + 'TableBody');
+ if (!tableBody) return;
+ 
+ var rows = [];
+ var allRows = tableBody.querySelectorAll('tr');
+ for (var i = 0; i < allRows.length; i++) {
+     rows.push(allRows[i]);
+ }
+ 
+ tableState[tableType].totalRows = rows.length;
+ tableState[tableType].filteredRows = rows;
+ filterTable(tableType);
 }
 
-    // ========== SECTION NAVIGATION ==========
-    function showSection(section) {
-        // Hide all sections first
-        document.getElementById('dashboard-content').style.display = 'none';
-        document.querySelectorAll('.table-container').forEach(container => {
-            container.classList.remove('active');
-        });
-        
-        // Update active nav link
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('data-section') === section) {
-                link.classList.add('active');
-            }
-        });
-        
-        // Show selected section
-        if (section === 'dashboard') {
-            document.getElementById('dashboard-content').style.display = 'block';
-            updatePageTitle('Dashboard Overview', 'Welcome back, ' + '<%= user.getFullName() %>');
-        } else if (section === 'admin') {
-            document.getElementById('admin-management').classList.add('active');
-            updatePageTitle('Admin Management', 'Add, View, Update, Delete Administrators');
-        } else if (section === 'teacher') {
-            document.getElementById('teacher-management').classList.add('active');
-            updatePageTitle('Teacher Management', 'Add, View, Update, Delete Teachers');
-        } else if (section === 'student') {
-            document.getElementById('student-management').classList.add('active');
-            updatePageTitle('Student Management', 'Add, View, Update, Delete Students');
-        } else if (section === 'all-users') {
-            document.getElementById('all-users').classList.add('active');
-            updatePageTitle('All System Users', 'View all users in the system');
-        } else {
-            updatePageTitle(section.charAt(0).toUpperCase() + section.slice(1) + ' Management', 
-                'Manage ' + section + ' details');
-        }
-        
-        // Close sidebar on mobile after clicking
-        if (window.innerWidth <= 992) {
-            document.querySelector('.sidebar').classList.remove('active');
-        }
-    }
-    
-    function updatePageTitle(title, subtitle) {
-        document.getElementById('page-title').textContent = title;
-        document.getElementById('page-subtitle').textContent = subtitle;
-    }
-    
-    // ========== COLLAPSIBLE NAVIGATION SECTIONS ==========
-    function toggleNavSection(section) {
-        const links = document.getElementById(section + '-links');
-        const title = document.querySelector('[onclick="toggleNavSection(\'' + section + '\')"]');
-        const icon = title.querySelector('i');
-        
-        links.classList.toggle('collapsed');
-        icon.classList.toggle('rotated');
-    }
-    
-    // ========== MOBILE MENU TOGGLE ==========
-    document.getElementById('menuToggle').addEventListener('click', function() {
-        document.querySelector('.sidebar').classList.toggle('active');
-    });
-    
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(event) {
-        const sidebar = document.querySelector('.sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        
-        if (window.innerWidth <= 992 && 
-            sidebar.classList.contains('active') && 
-            !sidebar.contains(event.target) && 
-            event.target !== menuToggle && 
-            !menuToggle.contains(event.target)) {
-            sidebar.classList.remove('active');
-        }
-    });
-    
-    // ========== CRUD OPERATIONS ==========
-    
-    // CREATE - Add New User (COMPLETELY FIXED)
 function addUser() {
-    const form = document.getElementById('addUserForm');
-    const formData = new FormData(form);
-    const addUserBtn = document.getElementById('addUserBtn');
-    
-    console.log("=== DEBUG: Add User Process Starting ===");
-    
-    // Get ALL form fields explicitly
-    const userRole = document.getElementById('userRole').value;
-    const fullName = document.querySelector('input[name="fullName"]').value;
-    const username = document.querySelector('input[name="username"]').value;
-    const password = document.getElementById('passwordField').value;
-    const email = document.querySelector('input[name="email"]').value;
-    const phone = document.querySelector('input[name="phone"]').value || '';
-    const department = document.querySelector('select[name="department"]').value || '';
-    const subjects = document.querySelector('input[name="subjects"]')?.value || '';
-    const rollNo = document.querySelector('input[name="rollNo"]')?.value || '';
-    const className = document.querySelector('select[name="className"]')?.value || '';
-    const isActive = document.querySelector('input[name="isActive"]').checked;
-    
-    console.log("Form Data Collected:");
-    console.log("- Role:", userRole);
-    console.log("- Full Name:", fullName);
-    console.log("- Username:", username);
-    console.log("- Password:", password ? "[HIDDEN]" : "EMPTY");
-    console.log("- Email:", email);
-    console.log("- Phone:", phone);
-    console.log("- Department:", department);
-    console.log("- Subjects:", subjects);
-    console.log("- Roll No:", rollNo);
-    console.log("- Class:", className);
-    console.log("- Active:", isActive);
-    
-    // Create URL encoded data instead of FormData (more reliable)
-    const params = new URLSearchParams();
-    params.append('action', 'add');
-    params.append('role', userRole);
-    params.append('fullName', fullName);
-    params.append('username', username);
-    params.append('password', password);
-    params.append('email', email);
-    if (phone) params.append('phone', phone);
-    if (department) params.append('department', department);
-    if (subjects) params.append('subjects', subjects);
-    if (rollNo) params.append('rollNo', rollNo);
-    if (className) params.append('className', className);
-    params.append('isActive', isActive ? 'true' : 'false');
-    
-    console.log("Final Parameters:", params.toString());
-    
-    // Disable button and show loading state
-    addUserBtn.disabled = true;
-    addUserBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
-    
-    fetch('UserServlet', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
-    })
-    .then(response => {
-        console.log("Response received, status:", response.status);
-        return response.json();
-    })
-    .then(result => {
-        console.log("Server Response:", result);
-        
-        if (result.success) {
-            // Show SUCCESS message with SweetAlert
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: result.message,
-                showConfirmButton: true,
-                confirmButtonText: 'OK',
-                timer: 3000
-            }).then((result) => {
-                if (result.isConfirmed || result.isDismissed) {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
-                    if (modal) {
-                        modal.hide();
-                    }
-                    
-                    // Reset form
-                    form.reset();
-                    
-                    // Reload page to show new user
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                }
-            });
-        } else {
-            // Show ERROR message
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: result.message || 'Failed to add user',
-                showConfirmButton: true,
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Fetch Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Network Error!',
-            text: 'Failed to connect to server. Please check console for details.',
-            showConfirmButton: true,
-            confirmButtonText: 'OK'
-        });
-    })
-    .finally(() => {
-        // Reset button state
-        addUserBtn.disabled = false;
-        addUserBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i> Add User';
-    });
-    
-    // Prevent default form submission
-    return false;
+ var form = document.getElementById("addUserForm");
+ var formData = new FormData(form);
+ 
+ var username = formData.get('username');
+ var password = formData.get('password');
+ var email = formData.get('email');
+ var fullName = formData.get('fullName');
+ var role = formData.get('role');
+ 
+ if (!username || !password || !email || !fullName || !role) {
+     Swal.fire("Validation Error", "Please fill all required fields", "warning");
+     return;
+ }
+ 
+ if (password.length < 6) {
+     Swal.fire("Validation Error", "Password must be at least 6 characters", "warning");
+     return;
+ }
+ 
+ var isActiveCheckbox = document.querySelector('#addUserForm input[name="isActive"]');
+ formData.set('isActive', isActiveCheckbox && isActiveCheckbox.checked ? 'true' : 'false');
+ 
+ var data = new URLSearchParams(formData);
+ data.append("action", "add");
+ 
+ Swal.fire({
+     title: 'Adding User...',
+     allowOutsideClick: false,
+     didOpen: function() { Swal.showLoading(); }
+ });
+
+ fetch("UserServlet", {
+     method: "POST",
+     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+     body: data.toString()
+ })
+ .then(function(res) { return res.json(); })
+ .then(function(result) {
+     Swal.close();
+     if (result.success) {
+         Swal.fire({ icon: "success", title: "Success!", text: result.message, timer: 2000 })
+             .then(function() { location.reload(); });
+     } else {
+         Swal.fire("Error", result.message, "error");
+     }
+ })
+ .catch(function(err) {
+     console.error("Add User Error:", err);
+     Swal.close();
+     Swal.fire("Error", "Failed to add user", "error");
+ });
 }
-    
-    
-    // READ - View User Details
-    function viewUser(userId) {
-        currentUserId = userId;
-        
-        // Show loading
-        document.getElementById('viewUserLoading').style.display = 'block';
-        document.getElementById('userDetailsContent').style.display = 'none';
-        
-        // Fetch user details
-        fetch('UserServlet?action=getUser&id=' + userId)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(user => {
-                console.log('User data received:', user);
-                
-                // Check if we got an error response
-                if (user && user.success === false) {
-                    throw new Error(user.message || 'Failed to load user');
-                }
-                
-                if (!user || !user.id) {
-                    throw new Error('Invalid user data received');
-                }
-                
-                // Format user details
-                let userDetails = '';
-                userDetails += '<div class="row">';
-                userDetails += '<div class="col-md-4 text-center">';
-                userDetails += '<div class="user-avatar-large">';
-                userDetails += user.fullName ? user.fullName.charAt(0).toUpperCase() : '?';
-                userDetails += '</div>';
-                userDetails += '<h4 class="mt-3">' + (user.fullName || 'Unknown') + '</h4>';
-                userDetails += user.active ? 
-                    '<span class="badge bg-success status-badge">Active</span>' : 
-                    '<span class="badge bg-danger status-badge">Inactive</span>';
-                userDetails += '<p class="text-muted mt-2">' + (user.role ? user.role.toUpperCase() : 'USER') + '</p>';
-                userDetails += '</div>';
-                userDetails += '<div class="col-md-8">';
-                userDetails += '<div class="detail-row">';
-                userDetails += '<div class="detail-label">Username:</div>';
-                userDetails += '<div class="detail-value">' + (user.username || 'N/A') + '</div>';
-                userDetails += '</div>';
-                userDetails += '<div class="detail-row">';
-                userDetails += '<div class="detail-label">Email:</div>';
-                userDetails += '<div class="detail-value">' + (user.email || 'N/A') + '</div>';
-                userDetails += '</div>';
-                userDetails += '<div class="detail-row">';
-                userDetails += '<div class="detail-label">Phone:</div>';
-                userDetails += '<div class="detail-value">' + (user.phone || 'N/A') + '</div>';
-                userDetails += '</div>';
-                
-                if (user.department) {
-                    userDetails += '<div class="detail-row">';
-                    userDetails += '<div class="detail-label">Department:</div>';
-                    userDetails += '<div class="detail-value">' + user.department + '</div>';
-                    userDetails += '</div>';
-                }
-                
-                // Student specific fields
-                if (user.role === 'student') {
-                    if (user.rollNo) {
-                        userDetails += '<div class="detail-row">';
-                        userDetails += '<div class="detail-label">Roll Number:</div>';
-                        userDetails += '<div class="detail-value">' + user.rollNo + '</div>';
-                        userDetails += '</div>';
-                    }
-                    if (user.className) {
-                        userDetails += '<div class="detail-row">';
-                        userDetails += '<div class="detail-label">Class:</div>';
-                        userDetails += '<div class="detail-value">' + user.className + '</div>';
-                        userDetails += '</div>';
-                    }
-                }
-                
-                // Teacher specific fields
-                if (user.role === 'teacher' && user.subjects) {
-                    userDetails += '<div class="detail-row">';
-                    userDetails += '<div class="detail-label">Subjects:</div>';
-                    userDetails += '<div class="detail-value">' + user.subjects + '</div>';
-                    userDetails += '</div>';
-                }
-                
-                userDetails += '<div class="detail-row">';
-                userDetails += '<div class="detail-label">User ID:</div>';
-                userDetails += '<div class="detail-value">' + user.id + '</div>';
-                userDetails += '</div>';
-                
-                if (user.createdAt) {
-                    userDetails += '<div class="detail-row">';
-                    userDetails += '<div class="detail-label">Account Created:</div>';
-                    userDetails += '<div class="detail-value">' + new Date(user.createdAt).toLocaleDateString() + '</div>';
-                    userDetails += '</div>';
-                }
-                
-                userDetails += '</div>';
-                userDetails += '</div>';
-                
-                // Update modal content
-                document.getElementById('userDetailsContent').innerHTML = userDetails;
-                
-                // Hide loading, show content
-                document.getElementById('viewUserLoading').style.display = 'none';
-                document.getElementById('userDetailsContent').style.display = 'block';
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
-                modal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('viewUserLoading').style.display = 'none';
-                
-                // Show error in modal
-                document.getElementById('userDetailsContent').innerHTML = 
-                    '<div class="alert alert-danger text-center">' + error.message + '</div>';
-                document.getElementById('userDetailsContent').style.display = 'block';
-                
-                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
-                modal.show();
-            });
-    }
-    
-    // UPDATE - Edit User
-    function editUser(userId) {
-        currentUserId = userId;
-        
-        console.log('Editing user ID:', userId);
-        
-        // Fetch user data
-        fetch('UserServlet?action=getUser&id=' + userId)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(user => {
-                console.log('Edit user data received:', user);
-                
-                if (!user || user.success === false) {
-                    throw new Error(user ? user.message : 'User not found');
-                }
-                
-                // Populate form fields
-                document.getElementById('editUserId').value = user.id;
-                document.getElementById('editUserRole').value = user.role || '';
-                document.getElementById('editFullName').value = user.fullName || '';
-                document.getElementById('editUsername').value = user.username || '';
-                document.getElementById('editEmail').value = user.email || '';
-                document.getElementById('editPhone').value = user.phone || '';
-                document.getElementById('editDepartment').value = user.department || '';
-                document.getElementById('editSubjects').value = user.subjects || '';
-                document.getElementById('editRollNo').value = user.rollNo || '';
-                document.getElementById('editClassName').value = user.className || '';
-                document.getElementById('editIsActive').checked = user.active || true;
-                document.getElementById('statusText').textContent = user.active ? 'Active' : 'Inactive';
-                
-                // Clear password field
-                document.getElementById('editPassword').value = '';
-                
-                // Toggle role-specific fields
-                toggleEditFields();
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
-                modal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Failed to load user data: ' + error.message
-                });
-            });
-    }
-    
-    // Update User
-    function updateUser() {
-        const form = document.getElementById('editUserForm');
-        const formData = new FormData(form);
-        const updateUserBtn = document.getElementById('updateUserBtn');
-        
-        // Get isActive checkbox value
-        const isActiveCheckbox = document.querySelector('#editUserForm input[name="isActive"]');
-        formData.set('isActive', isActiveCheckbox.checked ? 'true' : 'false');
-        
-        // Add action parameter
-        formData.set('action', 'update');
-        
-        // Disable button and show loading
-        updateUserBtn.disabled = true;
-        updateUserBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
-        
-        fetch('UserServlet', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(result => {
-            console.log('Update user response:', result);
-            
-            if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: result.message,
-                    showConfirmButton: false,
-                    timer: 2000
-                }).then(() => {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
-                    if (modal) modal.hide();
-                    
-                    // Reload page
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: result.message || 'Failed to update user'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Failed to update user: ' + error.message
-            });
-        })
-        .finally(() => {
-            // Reset button state
-            updateUserBtn.disabled = false;
-            updateUserBtn.innerHTML = '<i class="fas fa-save me-2"></i> Update User';
-        });
-    }
-    
-    // DELETE - Remove User
-    function deleteUser(userId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Send delete request
-                const formData = new FormData();
-                formData.append('action', 'delete');
-                formData.append('id', userId);
-                
-                fetch('UserServlet', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Deleted!',
-                            text: result.message,
-                            showConfirmButton: false,
-                            timer: 2000
-                        }).then(() => {
-                            // Remove row from table
-                            const row = document.querySelector('tr[data-id="' + userId + '"]');
-                            if (row) {
-                                row.remove();
-                                updateUserStats();
-                            } else {
-                                window.location.reload();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: result.message
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Failed to delete user.'
-                    });
-                });
-            }
-        });
-    }
-    
-    // ========== HELPER FUNCTIONS ==========
-    
-    function toggleFields() {
-        const role = document.getElementById('userRole').value;
-        const studentFields = document.getElementById('studentFields');
-        const teacherFields = document.getElementById('teacherFields');
-        
-        studentFields.style.display = 'none';
-        teacherFields.style.display = 'none';
-        
-        if (role === 'student') {
-            studentFields.style.display = 'block';
-        } else if (role === 'teacher') {
-            teacherFields.style.display = 'block';
-        }
-    }
-    
-    function toggleEditFields() {
-        const role = document.getElementById('editUserRole').value;
-        const studentFields = document.getElementById('editStudentFields');
-        const teacherFields = document.getElementById('editTeacherFields');
-        
-        studentFields.style.display = 'none';
-        teacherFields.style.display = 'none';
-        
-        if (role === 'student') {
-            studentFields.style.display = 'block';
-        } else if (role === 'teacher') {
-            teacherFields.style.display = 'block';
-        }
-    }
-    
-    function togglePassword(fieldId) {
-        const field = document.getElementById(fieldId);
-        const toggleBtn = event.currentTarget;
-        const icon = toggleBtn.querySelector('i');
-        
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            field.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-    
-    function editUserFromView() {
-        // Close view modal
-        const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewUserModal'));
-        if (viewModal) viewModal.hide();
-        
-        // Open edit modal
-        setTimeout(() => {
-            editUser(currentUserId);
-        }, 300);
-    }
-    
-    function updateUserStats() {
-        fetch('UserServlet?action=getStats')
-            .then(response => response.json())
-            .then(stats => {
-                // Update the stats cards
-                const statValues = document.querySelectorAll('.stat-value');
-                if (statValues.length >= 4) {
-                    statValues[0].textContent = stats.totalUsers || 0;
-                    statValues[1].textContent = stats.totalAdmins || 0;
-                    statValues[2].textContent = stats.totalTeachers || 0;
-                    statValues[3].textContent = stats.totalStudents || 0;
-                }
-            })
-            .catch(error => console.error('Error updating stats:', error));
-    }
-    
-    function logout() {
-        if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'login?action=logout';
-        }
-    }
-    
-    function showAddUserModal(role = '') {
-        const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
-        
-        // Reset form
-        document.getElementById('addUserForm').reset();
-        
-        // Set role if provided
-        if (role) {
-            document.getElementById('userRole').value = role;
-            toggleFields();
-        }
-        
-        modal.show();
-    }
-    
-    // ========== STATUS CHANGE HANDLER ==========
-    document.getElementById('editIsActive').addEventListener('change', function() {
-        document.getElementById('statusText').textContent = this.checked ? 'Active' : 'Inactive';
-    });
-    
-    function adjustNavigationForMobile() {
-        const navSections = document.querySelectorAll('.nav-section');
-        
-        if (window.innerWidth <= 768) {
-            navSections.forEach(section => {
-                const links = section.querySelector('.nav-links');
-                const icon = section.querySelector('.nav-title i');
-                
-                if (section.querySelector('.nav-link.active')) {
-                    links.classList.remove('collapsed');
-                    icon.classList.add('rotated');
-                } else {
-                    links.classList.add('collapsed');
-                    icon.classList.remove('rotated');
-                }
-            });
-        } else {
-            navSections.forEach(section => {
-                const links = section.querySelector('.nav-links');
-                const icon = section.querySelector('.nav-title i');
-                
-                links.classList.remove('collapsed');
-                icon.classList.add('rotated');
-            });
-        }
-    }
+
+function viewUser(id) {
+ currentUserId = id;
+ var modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+ document.getElementById('viewUserLoading').style.display = 'block';
+ document.getElementById('userDetailsContent').style.display = 'none';
+ modal.show();
+ 
+ fetch("UserServlet?action=getUser&id=" + id)
+ .then(function(res) { return res.json(); })
+ .then(function(user) {
+     document.getElementById('viewUserLoading').style.display = 'none';
+     document.getElementById('userDetailsContent').style.display = 'block';
+     
+     var roleClass = user.role === 'admin' ? 'badge-admin' : (user.role === 'teacher' ? 'badge-teacher' : 'badge-student');
+     var html = '<div class="text-center mb-4"><div class="user-avatar-large">' + user.fullName.charAt(0).toUpperCase() + '</div>' +
+         '<h4 class="mb-1">' + user.fullName + '</h4><span class="badge ' + roleClass + '">' + user.role.toUpperCase() + '</span></div>' +
+         '<div class="row"><div class="col-md-6">' +
+         '<div class="detail-row"><div class="detail-label"><i class="fas fa-id-badge me-2"></i>User ID</div><div class="detail-value">' + user.id + '</div></div>' +
+         '<div class="detail-row"><div class="detail-label"><i class="fas fa-user me-2"></i>Username</div><div class="detail-value">' + user.username + '</div></div>' +
+         '<div class="detail-row"><div class="detail-label"><i class="fas fa-envelope me-2"></i>Email</div><div class="detail-value">' + user.email + '</div></div>' +
+         '<div class="detail-row"><div class="detail-label"><i class="fas fa-phone me-2"></i>Phone</div><div class="detail-value">' + (user.phone || 'N/A') + '</div></div></div>' +
+         '<div class="col-md-6"><div class="detail-row"><div class="detail-label"><i class="fas fa-building me-2"></i>Department</div><div class="detail-value">' + (user.department || 'N/A') + '</div></div>';
+     
+     if (user.role === 'teacher') {
+         html += '<div class="detail-row"><div class="detail-label"><i class="fas fa-book me-2"></i>Subjects</div><div class="detail-value">' + (user.subjects || 'N/A') + '</div></div>';
+     }
+     if (user.role === 'student') {
+         html += '<div class="detail-row"><div class="detail-label"><i class="fas fa-id-card me-2"></i>Roll Number</div><div class="detail-value">' + (user.rollNo || 'N/A') + '</div></div>' +
+             '<div class="detail-row"><div class="detail-label"><i class="fas fa-users me-2"></i>Class</div><div class="detail-value">' + (user.className || 'N/A') + '</div></div>';
+     }
+     
+     html += '<div class="detail-row"><div class="detail-label"><i class="fas fa-toggle-on me-2"></i>Status</div><div class="detail-value">' +
+         '<span class="badge ' + (user.active ? 'bg-success' : 'bg-danger') + '">' + (user.active ? 'Active' : 'Inactive') + '</span></div></div></div></div>';
+     
+     document.getElementById('userDetailsContent').innerHTML = html;
+ })
+ .catch(function(err) {
+     console.error("View User Error:", err);
+     Swal.fire("Error", "Failed to load user details", "error");
+     modal.hide();
+ });
+}
+
+function editUser(id) {
+ currentUserId = id;
+ var modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+ 
+ fetch("UserServlet?action=getUser&id=" + id)
+ .then(function(res) { return res.json(); })
+ .then(function(user) {
+     document.getElementById('editUserId').value = user.id;
+     document.getElementById('editUserRole').value = user.role;
+     document.getElementById('editFullName').value = user.fullName;
+     document.getElementById('editUsername').value = user.username;
+     document.getElementById('editEmail').value = user.email;
+     document.getElementById('editPhone').value = user.phone || '';
+     document.getElementById('editDepartment').value = user.department || '';
+     document.getElementById('editIsActive').checked = user.active;
+     document.getElementById('statusText').textContent = user.active ? 'Active' : 'Inactive';
+     
+     if (user.role === 'student') {
+         document.getElementById('editStudentFields').style.display = 'block';
+         document.getElementById('editTeacherFields').style.display = 'none';
+         document.getElementById('editRollNo').value = user.rollNo || '';
+         document.getElementById('editClassName').value = user.className || '';
+     } else if (user.role === 'teacher') {
+         document.getElementById('editTeacherFields').style.display = 'block';
+         document.getElementById('editStudentFields').style.display = 'none';
+         document.getElementById('editSubjects').value = user.subjects || '';
+     } else {
+         document.getElementById('editStudentFields').style.display = 'none';
+         document.getElementById('editTeacherFields').style.display = 'none';
+     }
+     modal.show();
+ })
+ .catch(function(err) {
+     console.error("Edit User Error:", err);
+     Swal.fire("Error", "Failed to load user data", "error");
+ });
+}
+
+function editUserFromView() {
+ var viewModal = bootstrap.Modal.getInstance(document.getElementById('viewUserModal'));
+ if (viewModal) viewModal.hide();
+ setTimeout(function() { editUser(currentUserId); }, 300);
+}
+
+function updateUser() {
+ var form = document.getElementById("editUserForm");
+ var formData = new FormData(form);
+ 
+ if (!formData.get('username') || !formData.get('email') || !formData.get('fullName')) {
+     Swal.fire("Validation Error", "Please fill all required fields", "warning");
+     return;
+ }
+ 
+ var password = formData.get('password');
+ if (password && password.length < 6) {
+     Swal.fire("Validation Error", "Password must be at least 6 characters", "warning");
+     return;
+ }
+ 
+ var isActiveCheckbox = document.querySelector('#editUserForm input[name="isActive"]');
+ formData.set('isActive', isActiveCheckbox && isActiveCheckbox.checked ? 'true' : 'false');
+ 
+ var data = new URLSearchParams(formData);
+ data.append("action", "update");
+ 
+ Swal.fire({ title: 'Updating User...', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+ fetch("UserServlet", {
+     method: "POST",
+     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+     body: data.toString()
+ })
+ .then(function(res) { return res.json(); })
+ .then(function(result) {
+     Swal.close();
+     if (result.success) {
+         Swal.fire({ icon: "success", title: "Updated!", text: result.message, timer: 2000 })
+             .then(function() { location.reload(); });
+     } else {
+         Swal.fire("Error", result.message, "error");
+     }
+ })
+ .catch(function(err) {
+     console.error("Update Error:", err);
+     Swal.close();
+     Swal.fire("Error", "Failed to update user", "error");
+ });
+}
+
+function deleteUser(id) {
+ Swal.fire({
+     title: "Delete User?",
+     text: "This action cannot be undone!",
+     icon: "warning",
+     showCancelButton: true,
+     confirmButtonColor: "#dc3545",
+     confirmButtonText: "Yes, delete it!"
+ }).then(function(res) {
+     if (!res.isConfirmed) return;
+     
+     Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+     fetch("UserServlet", {
+         method: "POST",
+         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+         body: "action=delete&id=" + id
+     })
+     .then(function(res) { return res.json(); })
+     .then(function(result) {
+         Swal.close();
+         if (result.success) {
+             Swal.fire({ icon: "success", title: "Deleted!", text: result.message, timer: 2000 })
+                 .then(function() { location.reload(); });
+         } else {
+             Swal.fire("Error", result.message, "error");
+         }
+     })
+     .catch(function(err) {
+         console.error("Delete Error:", err);
+         Swal.close();
+         Swal.fire("Error", "Failed to delete user", "error");
+     });
+ });
+}
+
+function exportToExcel(tableType) {
+ var state = tableState[tableType];
+ if (!state || state.filteredRows.length === 0) {
+     Swal.fire({ icon: "warning", title: "No Data", text: "Nothing to export", timer: 2000 });
+     return;
+ }
+
+ var table = document.getElementById(tableType + "TableBody").closest("table");
+ var headers = [];
+ var headerCells = table.querySelectorAll("thead th");
+ for (var i = 0; i < headerCells.length; i++) {
+     var text = headerCells[i].innerText.trim();
+     if (text !== "Actions" && text !== "") headers.push(text);
+ }
+
+ var csv = headers.join(",") + "\n";
+
+ for (var j = 0; j < state.filteredRows.length; j++) {
+     var cells = state.filteredRows[j].querySelectorAll("td");
+     var rowData = [];
+     for (var k = 0; k < cells.length - 1; k++) {
+         var text = cells[k].innerText.trim().replace(/\n/g, " ").replace(/,/g, ";").replace(/"/g, '""');
+         rowData.push('"' + text + '"');
+     }
+     csv += rowData.join(",") + "\n";
+ }
+
+ var blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+ var link = document.createElement("a");
+ link.href = URL.createObjectURL(blob);
+ link.download = tableType + "_users_" + new Date().toISOString().split('T')[0] + ".csv";
+ link.style.visibility = "hidden";
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+ 
+ Swal.fire({ icon: "success", title: "Exported!", text: "CSV downloaded", timer: 2000 });
+}
+
+function filterTable(tableType) {
+ var state = tableState[tableType];
+ var searchInput = document.getElementById(tableType + 'Search');
+ var tableBody = document.getElementById(tableType + 'TableBody');
+ 
+ state.searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+ state.statusFilter = getFilterValue(tableType, 'StatusFilter');
+ state.deptFilter = getFilterValue(tableType, 'DeptFilter');
+ state.classFilter = getFilterValue(tableType, 'ClassFilter');
+ state.roleFilter = getFilterValue(tableType, 'RoleFilter');
+ state.currentPage = 1;
+ 
+ var allRows = tableBody.querySelectorAll('tr');
+ var rows = [];
+ for (var i = 0; i < allRows.length; i++) rows.push(allRows[i]);
+ 
+ state.filteredRows = rows.filter(function(row) {
+     return matchesAllFilters(row, state, tableType);
+ });
+ 
+ sortRows(tableType);
+ updateTableDisplay(tableType);
+}
+
+function getFilterValue(tableType, filterName) {
+ var elem = document.getElementById(tableType + filterName);
+ return elem ? elem.value : 'all';
+}
+
+function matchesAllFilters(row, state, tableType) {
+ var matchesSearch = !state.searchTerm || checkSearchMatch(row, state.searchTerm);
+ var matchesStatus = state.statusFilter === 'all' || row.getAttribute('data-status') === state.statusFilter;
+ var matchesDept = true;
+ var matchesClass = true;
+ var matchesRole = true;
+ 
+ if (tableType === 'teacher' || tableType === 'student' || tableType === 'all-users') {
+     var dept = row.getAttribute('data-department') || '';
+     matchesDept = state.deptFilter === 'all' || dept === state.deptFilter.toLowerCase();
+ }
+ 
+ if (tableType === 'student') {
+     var className = row.getAttribute('data-class') || '';
+     matchesClass = state.classFilter === 'all' || className === state.classFilter.toLowerCase();
+ }
+ 
+ if (tableType === 'all-users') {
+     matchesRole = state.roleFilter === 'all' || row.getAttribute('data-role') === state.roleFilter;
+ }
+ 
+ return matchesSearch && matchesStatus && matchesDept && matchesClass && matchesRole;
+}
+
+function checkSearchMatch(row, searchTerm) {
+ var fields = ['name', 'username', 'email', 'phone', 'department', 'subjects', 'rollno', 'class'];
+ for (var i = 0; i < fields.length; i++) {
+     var value = row.getAttribute('data-' + fields[i]) || '';
+     if (value.includes(searchTerm)) return true;
+ }
+ return false;
+}
+
+function sortTable(tableType) {
+ var sortBy = document.getElementById(tableType + 'SortBy').value;
+ tableState[tableType].sortBy = sortBy;
+ sortRows(tableType);
+ updateTableDisplay(tableType);
+}
+
+function sortRows(tableType) {
+ var state = tableState[tableType];
+ state.filteredRows.sort(function(a, b) {
+     switch(state.sortBy) {
+         case 'id': return parseInt(a.getAttribute('data-id')) - parseInt(b.getAttribute('data-id'));
+         case 'name': return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+         case 'name_desc': return b.getAttribute('data-name').localeCompare(a.getAttribute('data-name'));
+         case 'username': return a.getAttribute('data-username').localeCompare(b.getAttribute('data-username'));
+         case 'email': return a.getAttribute('data-email').localeCompare(b.getAttribute('data-email'));
+         case 'dept': return (a.getAttribute('data-department') || '').localeCompare(b.getAttribute('data-department') || '');
+         case 'role': return a.getAttribute('data-role').localeCompare(b.getAttribute('data-role'));
+         default: return 0;
+     }
+ });
+}
+
+function updateTableDisplay(tableType) {
+ var state = tableState[tableType];
+ var tableBody = document.getElementById(tableType + 'TableBody');
+ var noResults = document.getElementById(tableType + 'NoResults');
+ 
+ var allRows = tableBody.querySelectorAll('tr');
+ for (var i = 0; i < allRows.length; i++) allRows[i].style.display = 'none';
+ 
+ var startIdx = (state.currentPage - 1) * state.pageSize;
+ var endIdx = Math.min(startIdx + state.pageSize, state.filteredRows.length);
+ 
+ for (var j = startIdx; j < endIdx; j++) {
+     if (state.filteredRows[j]) state.filteredRows[j].style.display = '';
+ }
+ 
+ updateCounts(tableType);
+ 
+ if (noResults) {
+     noResults.style.display = state.filteredRows.length === 0 ? 'block' : 'none';
+     tableBody.style.display = state.filteredRows.length === 0 ? 'none' : '';
+ }
+ 
+ updatePagination(tableType);
+}
+
+function updateCounts(tableType) {
+ var state = tableState[tableType];
+ var showingCount = document.getElementById(tableType + 'ShowingCount');
+ var totalCount = document.getElementById(tableType + 'TotalCount');
+ if (showingCount) showingCount.textContent = state.filteredRows.length;
+ if (totalCount) totalCount.textContent = state.totalRows;
+}
+
+function updatePagination(tableType) {
+ var state = tableState[tableType];
+ var pagination = document.getElementById(tableType + 'Pagination');
+ var pageSizeSelect = document.getElementById(tableType + 'PageSize');
+ 
+ if (pageSizeSelect) state.pageSize = parseInt(pageSizeSelect.value);
+ 
+ var totalPages = Math.ceil(state.filteredRows.length / state.pageSize);
+ state.currentPage = Math.min(state.currentPage, totalPages || 1);
+ 
+ if (pagination && totalPages > 1) {
+     var html = buildPaginationHTML(tableType, state.currentPage, totalPages);
+     pagination.querySelector('ul').innerHTML = html;
+     pagination.style.display = 'block';
+ } else if (pagination) {
+     pagination.style.display = 'none';
+ }
+}
+
+function buildPaginationHTML(tableType, currentPage, totalPages) {
+ var html = '<li class="page-item ' + (currentPage == 1 ? 'disabled' : '') + '">' +
+     '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + (currentPage - 1) + ')">&laquo;</a></li>';
+ 
+ var maxVisible = 5;
+ var startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+ var endPage = Math.min(totalPages, startPage + maxVisible - 1);
+ 
+ if (endPage - startPage + 1 < maxVisible) startPage = Math.max(1, endPage - maxVisible + 1);
+ 
+ for (var i = startPage; i <= endPage; i++) {
+     html += '<li class="page-item ' + (i == currentPage ? 'active' : '') + '">' +
+         '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + i + ')">' + i + '</a></li>';
+ }
+ 
+ html += '<li class="page-item ' + (currentPage == totalPages ? 'disabled' : '') + '">' +
+     '<a class="page-link" href="#" onclick="changePage(\'' + tableType + '\', ' + (currentPage + 1) + ')">&raquo;</a></li>';
+ 
+ return html;
+}
+
+function changePage(tableType, page) {
+ tableState[tableType].currentPage = page;
+ updateTableDisplay(tableType);
+}
+
+function clearFilters(tableType) {
+ var searchInput = document.getElementById(tableType + 'Search');
+ if (searchInput) searchInput.value = '';
+ 
+ var filters = ['StatusFilter', 'DeptFilter', 'ClassFilter', 'RoleFilter', 'SortBy', 'PageSize'];
+ for (var i = 0; i < filters.length; i++) {
+     var elem = document.getElementById(tableType + filters[i]);
+     if (elem) elem.value = (filters[i] === 'SortBy' ? 'id' : (filters[i] === 'PageSize' ? '10' : 'all'));
+ }
+ 
+ filterTable(tableType);
+}
+
+function toggleFields() {
+ var role = document.getElementById('userRole').value;
+ document.getElementById('studentFields').style.display = role === 'student' ? 'block' : 'none';
+ document.getElementById('teacherFields').style.display = role === 'teacher' ? 'block' : 'none';
+}
+
+function toggleEditFields() {
+ var role = document.getElementById('editUserRole').value;
+ document.getElementById('editStudentFields').style.display = role === 'student' ? 'block' : 'none';
+ document.getElementById('editTeacherFields').style.display = role === 'teacher' ? 'block' : 'none';
+}
+
+function togglePassword(fieldId) {
+ var field = document.getElementById(fieldId);
+ var icon = event.currentTarget.querySelector('i');
+ if (field.type === 'password') {
+     field.type = 'text';
+     icon.classList.remove('fa-eye');
+     icon.classList.add('fa-eye-slash');
+ } else {
+     field.type = 'password';
+     icon.classList.remove('fa-eye-slash');
+     icon.classList.add('fa-eye');
+ }
+}
+
+function showSection(section) {
+ document.getElementById('dashboard-content').style.display = 'none';
+ var containers = document.querySelectorAll('.table-container');
+ for (var i = 0; i < containers.length; i++) containers[i].classList.remove('active');
+ 
+ var links = document.querySelectorAll('.nav-link');
+ for (var j = 0; j < links.length; j++) {
+     links[j].classList.remove('active');
+     if (links[j].getAttribute('data-section') === section) links[j].classList.add('active');
+ }
+ 
+ var titles = {
+     'dashboard': ['Dashboard Overview', 'Welcome back!'],
+     'admin': ['Admin Management', 'Add, View, Update, Delete Administrators'],
+     'teacher': ['Teacher Management', 'Add, View, Update, Delete Teachers'],
+     'student': ['Student Management', 'Add, View, Update, Delete Students'],
+     'all-users': ['All System Users', 'View all users in the system']
+ };
+ 
+ if (section === 'dashboard') {
+     document.getElementById('dashboard-content').style.display = 'block';
+ } else {
+     var elem = document.getElementById(section + '-management') || document.getElementById('all-users');
+     if (elem) elem.classList.add('active');
+ }
+ 
+ if (titles[section]) updatePageTitle(titles[section][0], titles[section][1]);
+ 
+ if (window.innerWidth <= 992) {
+     var sidebar = document.querySelector('.sidebar');
+     if (sidebar) sidebar.classList.remove('active');
+ }
+}
+
+function updatePageTitle(title, subtitle) {
+ document.getElementById('page-title').textContent = title;
+ document.getElementById('page-subtitle').textContent = subtitle;
+}
+
+function toggleNavSection(section) {
+ var links = document.getElementById(section + '-links');
+ var title = document.querySelector('[onclick="toggleNavSection(\'' + section + '\')"]');
+ if (links && title) {
+     links.classList.toggle('collapsed');
+     var icon = title.querySelector('i');
+     if (icon) icon.classList.toggle('rotated');
+ }
+}
+
+function showAddUserModal(role) {
+ if (typeof role === 'undefined') role = '';
+ var modal = new bootstrap.Modal(document.getElementById('addUserModal'));
+ document.getElementById('addUserForm').reset();
+ if (role) {
+     document.getElementById('userRole').value = role;
+     toggleFields();
+ }
+ modal.show();
+}
+
+function logout() {
+ Swal.fire({
+     title: 'Logout?',
+     text: "Are you sure?",
+     icon: 'question',
+     showCancelButton: true,
+     confirmButtonColor: '#dc3545',
+     confirmButtonText: 'Yes, logout'
+ }).then(function(result) {
+     if (result.isConfirmed) window.location.href = 'login?action=logout';
+ });
+}
+
+function adjustNavigationForMobile() {
+ var navSections = document.querySelectorAll('.nav-section');
+ for (var i = 0; i < navSections.length; i++) {
+     var links = navSections[i].querySelector('.nav-links');
+     var icon = navSections[i].querySelector('.nav-title i');
+     if (window.innerWidth <= 768) {
+         if (navSections[i].querySelector('.nav-link.active')) {
+             if (links) links.classList.remove('collapsed');
+             if (icon) icon.classList.add('rotated');
+         } else {
+             if (links) links.classList.add('collapsed');
+             if (icon) icon.classList.remove('rotated');
+         }
+     } else {
+         if (links) links.classList.remove('collapsed');
+         if (icon) icon.classList.add('rotated');
+     }
+ }
+}
+
+console.log('EduTrack Pro Admin Dashboard v1.0.0 - Ready');
 </script>
 </body>
 </html>
+

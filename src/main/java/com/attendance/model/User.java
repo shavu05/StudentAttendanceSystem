@@ -13,31 +13,23 @@ public class User {
     private String department;
     private String subjects;
     private String rollNo;
-    private String className;  // This maps to 'class' column in DB
+    private String className; // This maps to 'class' column in database
     private boolean isActive;
     private Timestamp createdAt;
+    private Timestamp lastLogin;
     
     // Constructors
     public User() {}
     
-    public User(int id, String username, String password, String fullName, String email, 
-                String phone, String role, String department, String subjects, 
-                String rollNo, String className, boolean isActive) {
+    public User(int id, String username, String fullName, String email, String role) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.fullName = fullName;
         this.email = email;
-        this.phone = phone;
         this.role = role;
-        this.department = department;
-        this.subjects = subjects;
-        this.rollNo = rollNo;
-        this.className = className;
-        this.isActive = isActive;
     }
     
-    // Getters and Setters (ALL CORRECTED)
+    // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     
@@ -68,13 +60,34 @@ public class User {
     public String getRollNo() { return rollNo; }
     public void setRollNo(String rollNo) { this.rollNo = rollNo; }
     
-    // FIXED: This should map to 'class' column in database
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
     
     public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public void setActive(boolean isActive) { this.isActive = isActive; }
     
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    
+    public Timestamp getLastLogin() { return lastLogin; }
+    public void setLastLogin(Timestamp lastLogin) { this.lastLogin = lastLogin; }
+    
+    // Helper methods
+    public boolean isAdmin() {
+        return "admin".equalsIgnoreCase(role);
+    }
+    
+    public boolean isTeacher() {
+        return "teacher".equalsIgnoreCase(role);
+    }
+    
+    public boolean isStudent() {
+        return "student".equalsIgnoreCase(role);
+    }
+    
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", username=" + username + ", fullName=" + fullName + 
+               ", email=" + email + ", role=" + role + ", isActive=" + isActive + "]";
+    }
 }
