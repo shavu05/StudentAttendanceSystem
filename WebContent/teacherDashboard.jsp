@@ -358,9 +358,9 @@ table.table thead {
                 <i class="fas fa-users"></i> Students
             </a>
             <div class="mt-auto p-3">
-                <a class="nav-link text-danger" href="#" onclick="confirmLogout()">
-    <i class="fas fa-sign-out-alt"></i> Logout
-				</a>
+               <a class="nav-link text-danger" href="#" onclick="confirmLogout()" style="color: white !important;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
             </div>
         </nav>
     </div>
@@ -820,7 +820,7 @@ table.table thead {
         <!-- Footer Credit -->
         <div class="credit-badge">
     <i class="fas fa-user-graduate"></i>
-    <span>Created by <strong>Shravani Sanika</strong></span>
+    <span>Created by <strong>Shravani & Sanika</strong></span>
 </div>
 <!-- End main-content -->
     </div>

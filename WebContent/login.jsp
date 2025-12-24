@@ -248,24 +248,34 @@
             font-size: 0.8rem;
         }
         
-        .role-icon {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .role-option[data-role="admin"] .role-icon {
-            color: var(--danger);
-        }
-        
-        .role-option[data-role="teacher"] .role-icon {
-            color: var(--warning);
-        }
-        
-        .role-option[data-role="student"] .role-icon {
-            color: var(--success);
-        }
-        
+      /* Add this CSS to fix the admin icon size issue */
+
+/* Original role icon styling */
+.role-icon {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* FIXED: Make admin icon larger to match others */
+.role-option[data-role="admin"] .role-icon {
+    color: var(--danger);
+    font-size: 3.5rem; /* Increased from 2.2rem */
+    font-weight: 600; /* Added weight */
+}
+
+.role-option[data-role="teacher"] .role-icon {
+    color: var(--warning);
+    font-size: 2.2rem;
+}
+
+.role-option[data-role="student"] .role-icon {
+    color: var(--success);
+    font-size: 2.2rem;
+}
+
+/* Alternative: Use a different, bolder admin icon */
+/* Replace the admin icon in HTML from fa-user-shield to one of these: */
         /* Form Styles - FIXED */
         .form-group {
             margin-bottom: 25px;

@@ -619,7 +619,7 @@
                 <span class="d-none d-sm-inline">Welcome, <strong><%= studentName %></strong></span>
                 
                 
-             <button type="button" class="btn btn-logout" onclick="confirmLogout()">
+             <button type="button" class="btn btn-logout" onclick="confirmLogout()" >
     <i class="fas fa-sign-out-alt"></i> Logout
 </button>
 
