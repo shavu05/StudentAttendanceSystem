@@ -1050,26 +1050,26 @@
                 </ul>
             </div>
             
-            <div class="nav-section">
+            <!--  <div class="nav-section">
                 <div class="nav-title" onclick="toggleNavSection('system-nav')">
-                    System Management
+                   
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <ul class="nav-links" id="system-nav-links">
                     <li><a class="nav-link" data-section="classes" onclick="showSection('classes')">
-                        <i class="fas fa-chalkboard"></i> Classes Management
+                        <i class="fas fa-chalkboard"></i> 
                     </a></li>
                     <li><a class="nav-link" data-section="attendance" onclick="showSection('attendance')">
-                        <i class="fas fa-clipboard-check"></i> Attendance Management
+                        <i class="fas fa-clipboard-check"></i> 
                     </a></li>
                     <li><a class="nav-link" data-section="reports" onclick="showSection('reports')">
-                        <i class="fas fa-chart-bar"></i> Reports & Analytics
+                        <i class="fas fa-chart-bar"></i> 
                     </a></li>
                     <li><a class="nav-link" data-section="settings" onclick="showSection('settings')">
-                        <i class="fas fa-cog"></i> System Settings
+                        <i class="fas fa-cog"></i> 
                     </a></li>
                 </ul>
-            </div>
+            </div> -->
         </div>
         
         <div class="sidebar-user">
@@ -1691,9 +1691,9 @@
                         <button class="btn-clear" onclick="clearFilters('all-users')">
                             <i class="fas fa-eraser"></i> Clear
                         </button>
-                        <button class="btn-filter" onclick="exportToExcel('all-users')">
-                            <i class="fas fa-file-excel"></i> Export
-                        </button>
+                       <!--  <button class="btn-filter" onclick="exportToExcel('all-users')">
+                            <i class="fas fa-file-excel"></i> 
+                        </button>--> 
                     </div>
                 </div>
                 

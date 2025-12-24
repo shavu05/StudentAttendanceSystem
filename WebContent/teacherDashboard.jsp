@@ -313,9 +313,9 @@ table.table thead {
                 <i class="fas fa-users"></i> Students
             </a>
             <div class="mt-auto p-3">
-                <a class="nav-link text-danger" href="LoginServlet?action=logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                <a class="nav-link text-danger" href="#" onclick="confirmLogout()">
+    <i class="fas fa-sign-out-alt"></i> Logout
+				</a>
             </div>
         </nav>
     </div>
@@ -1335,6 +1335,26 @@ function exportToExcel() {
             end: formatDate(today)
         });
     });
+    
+    
+ // Add this function to your JavaScript section
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Logout?',
+            text: 'Are you sure you want to logout?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Logout',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#ef476f'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to logout servlet
+                window.location.href = 'LoginServlet?action=logout';
+            }
+        });
+    }
+ 
     </script>
 </body>
 </html>

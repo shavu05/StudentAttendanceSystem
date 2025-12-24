@@ -36,6 +36,26 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        String action = request.getParameter("action");
+        
+        // ============================================
+        // HANDLE LOGOUT ACTION
+        // ============================================
+        if ("logout".equals(action)) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                // Get username before invalidating for logging
+                String username = (String) session.getAttribute("username");
+                System.out.println("✅ User logged out: " + username);
+                session.invalidate();
+            }
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        
+        // ============================================
+        // HANDLE LOGIN ACTION (existing code)
+        // ============================================
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String role = request.getParameter("role");
@@ -106,5 +126,26 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
             return; // ← ADD THIS
         }
+    }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        // Also handle logout via GET request
+        String action = request.getParameter("action");
+        if ("logout".equals(action)) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                String username = (String) session.getAttribute("username");
+                System.out.println("✅ User logged out (GET): " + username);
+                session.invalidate();
+            }
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        
+        // For GET requests without action, show login page
+        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 }
