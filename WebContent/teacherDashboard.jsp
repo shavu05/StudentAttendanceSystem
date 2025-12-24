@@ -59,6 +59,59 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
         
+        /* Add this to your existing CSS in the <style> section */
+
+/* Fix for table headers */
+.table thead th {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    font-weight: 600;
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+/* Bootstrap table-dark alternative for dark headers */
+.table-dark {
+    background-color: #343a40 !important;
+}
+
+.table-dark th {
+    color: #fff !important;
+    background-color: #343a40 !important;
+    border-color: #454d55 !important;
+}
+
+/* Ensure all tables have proper styling */
+table.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table.table thead {
+    background-color: #f8f9fa;
+}
+
+/* Fix for action buttons visibility */
+.btn-present, .btn-absent {
+    margin: 2px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Make sure table data is visible */
+.table td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+
+/* Student list table fixes */
+#studentListBody tr td {
+    padding: 8px;
+}
         .sidebar .logo {
             padding: 25px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -400,10 +453,27 @@
                         </div>
                         <div class="col-md-4">
                             <label>Class Filter:</label>
-                            <select class="form-select" id="classFilter" onchange="loadAttendanceForDate()">
+                            <select class="form-select" id="classFilter" onchange="filterStudentsByClass()">
                                 <option value="">All Classes</option>
-                                <option value="10A">10A</option>
-                                <option value="10-A">10-A</option>
+                                <%
+                                    try {
+                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                        pst = conn.prepareStatement(classSQL);
+                                        rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            String className = rs.getString("class");
+                                            if (className != null && !className.trim().isEmpty()) {
+                                %>
+                                <option value="<%= className %>"><%= className %></option>
+                                <%
+                                            }
+                                        }
+                                        rs.close();
+                                        pst.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                %>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -451,7 +521,7 @@
                                             checkRs.close();
                                             checkPst.close();
                                 %>
-                                <tr data-student-id="<%= studentId %>" data-status="<%= status %>" class="student-row">
+                                <tr data-student-id="<%= studentId %>" data-class="<%= studentClass != null ? studentClass : "" %>" class="student-row">
                                     <td><%= rollNo != null ? rollNo : "N/A" %></td>
                                     <td><%= fullName %></td>
                                     <td><%= studentClass != null ? studentClass : "N/A" %></td>
@@ -508,8 +578,25 @@
                             <label>Class:</label>
                             <select class="form-select" id="viewClassFilter">
                                 <option value="">All Classes</option>
-                                <option value="10A">10A</option>
-                                <option value="10-A">10-A</option>
+                                <%
+                                    try {
+                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                        pst = conn.prepareStatement(classSQL);
+                                        rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            String className = rs.getString("class");
+                                            if (className != null && !className.trim().isEmpty()) {
+                                %>
+                                <option value="<%= className %>"><%= className %></option>
+                                <%
+                                            }
+                                        }
+                                        rs.close();
+                                        pst.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                %>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -550,7 +637,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label>Month:</label>
                             <select class="form-select" id="reportMonth">
                                 <option value="1">January</option>
@@ -567,14 +654,39 @@
                                 <option value="12" selected>December</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label>Year:</label>
                             <select class="form-select" id="reportYear">
                                 <option value="2024">2024</option>
                                 <option value="2025" selected>2025</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label>Class:</label>
+                            <select class="form-select" id="reportClassFilter">
+                                <option value="">All Classes</option>
+                                <%
+                                    try {
+                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                        pst = conn.prepareStatement(classSQL);
+                                        rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            String className = rs.getString("class");
+                                            if (className != null && !className.trim().isEmpty()) {
+                                %>
+                                <option value="<%= className %>"><%= className %></option>
+                                <%
+                                            }
+                                        }
+                                        rs.close();
+                                        pst.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                %>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label>&nbsp;</label>
                             <button class="btn btn-primary w-100" onclick="generateReport()">
                                 <i class="fas fa-chart-bar"></i> Generate Report
@@ -582,7 +694,7 @@
                         </div>
                     </div>
                     <div id="reportResults">
-                        <p class="text-center text-muted">Select month and year, then click Generate Report</p>
+                        <p class="text-center text-muted">Select month, year and class, then click Generate Report</p>
                     </div>
                 </div>
             </div>
@@ -666,505 +778,563 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // SIMPLIFIED Mark attendance function - GUARANTEED TO WORK
-        function markStatusSimple(studentId, status) {
-            try {
-                console.log('Simple mark:', studentId, status);
-                
-                // Find status cell by unique class
-                const statusCell = document.querySelector('.status-cell-' + studentId);
-                
-                if (!statusCell) {
-                    alert('Error: Could not find status cell for student ' + studentId);
-                    return;
-                }
-                
-                // Update display
-                if (status === 'present') {
-                    statusCell.innerHTML = '<span class="attendance-badge badge-present">Present</span>';
-                } else {
-                    statusCell.innerHTML = '<span class="attendance-badge badge-absent">Absent</span>';
-                }
-                
-                // Store change
-                attendanceChanges[studentId] = status;
-                console.log('Stored:', attendanceChanges);
-                
-                // Show success
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Marked ' + status,
-                    showConfirmButton: false,
-                    timer: 800
-                });
-                
-            } catch (error) {
-                console.error('Error in markStatusSimple:', error);
-                alert('JavaScript Error: ' + error.message);
-            }
+ // Store attendance changes
+    let attendanceChanges = {};
+
+    // Mark attendance - FIXED VERSION
+    function markStatusSimple(studentId, status) {
+        console.log('✅ Marking:', studentId, status);
+        
+        const statusCell = document.querySelector('.status-cell-' + studentId);
+        
+        if (!statusCell) {
+            console.error('❌ Status cell not found for student:', studentId);
+            Swal.fire('Error', 'Could not find student status cell', 'error');
+            return;
         }
         
-        // Page Navigation
-        function showPage(pageId) {
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(pageId).classList.add('active');
-            
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            if (pageId === 'dashboard') {
-                loadDashboardChart();
-            }
+        // Update display
+        if (status === 'present') {
+            statusCell.innerHTML = '<span class="attendance-badge badge-present">Present</span>';
+        } else {
+            statusCell.innerHTML = '<span class="attendance-badge badge-absent">Absent</span>';
         }
         
-        // Mark attendance status
-        let attendanceChanges = {};
+        // Store change
+        attendanceChanges[studentId] = status;
+        console.log('Current changes:', attendanceChanges);
         
-        function markStatus(studentId, status) {
-            console.log('=== markStatus called ===');
-            console.log('Student ID:', studentId);
-            console.log('Student ID type:', typeof studentId);
-            console.log('Status:', status);
-            
-            // Try to find all rows with data-student-id
-            const allRows = document.querySelectorAll('tr[data-student-id]');
-            console.log('Total rows with data-student-id:', allRows.length);
-            
-            if (allRows.length > 0) {
-                console.log('First row data-student-id:', allRows[0].getAttribute('data-student-id'));
-                
-                // Log all student IDs
-                allRows.forEach((row, index) => {
-                    console.log(`Row ${index}: data-student-id = "${row.getAttribute('data-student-id')}"`);
-                });
-            }
-            
-            // Try different selectors
-            const row1 = document.querySelector(`tr[data-student-id="${studentId}"]`);
-            const row2 = document.querySelector(`tr.student-row[data-student-id="${studentId}"]`);
-            const row3 = document.querySelector(`#studentTableBody tr[data-student-id="${studentId}"]`);
-            
-            console.log('Selector 1 result:', row1);
-            console.log('Selector 2 result:', row2);
-            console.log('Selector 3 result:', row3);
-            
-            const row = row3 || row2 || row1;
-            
-            if (!row) {
-                console.error('❌ Row not found for student ID:', studentId);
-                alert('Error: Could not find student row! Check console for details.');
-                return;
-            }
-            
-            console.log('✅ Found row:', row);
-            
-            const statusCell = row.querySelector('.status-cell');
-            console.log('Found status cell:', statusCell);
-            
-            if (!statusCell) {
-                console.error('Status cell not found!');
-                alert('Error: Could not find status cell!');
-                return;
-            }
-            
-            row.setAttribute('data-status', status);
-            
-            if (status === 'present') {
-                statusCell.innerHTML = '<span class="attendance-badge badge-present">Present</span>';
-            } else {
-                statusCell.innerHTML = '<span class="attendance-badge badge-absent">Absent</span>';
-            }
-            
-            attendanceChanges[studentId] = status;
-            console.log('✅ Current attendance changes:', attendanceChanges);
-            
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: `Marked ${status}`,
-                showConfirmButton: false,
-                timer: 1000
-            });
+        // Show success toast
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Marked ' + status,
+            showConfirmButton: false,
+            timer: 800
+        });
+    }
+
+    // Page Navigation
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        if (pageId === 'dashboard') {
+            loadDashboardChart();
         }
-        
-        // Mark all present
-        function markAllPresent() {
-            Swal.fire({
-                title: 'Mark All Present?',
-                text: 'This will mark all students as present',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark all'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.querySelectorAll('#studentTableBody tr').forEach(row => {
+    }
+
+    // Mark all present
+    function markAllPresent() {
+        Swal.fire({
+            title: 'Mark All Present?',
+            text: 'This will mark all visible students as present',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, mark all'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const visibleRows = document.querySelectorAll('#studentTableBody tr.student-row');
+                visibleRows.forEach(row => {
+                    if (row.style.display !== 'none') {
                         const studentId = row.getAttribute('data-student-id');
-                        markStatus(studentId, 'present');
-                    });
-                }
-            });
+                        if (studentId) {
+                            markStatusSimple(parseInt(studentId), 'present');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // Filter students by class
+    function filterStudentsByClass() {
+        const classFilter = document.getElementById('classFilter').value;
+        const rows = document.querySelectorAll('#studentTableBody tr.student-row');
+        
+        rows.forEach(row => {
+            const studentClass = row.getAttribute('data-class');
+            if (classFilter === '' || studentClass === classFilter) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Save all attendance
+    function saveAllAttendance() {
+        const date = document.getElementById('attendanceDate').value;
+        const teacherId = <%= teacherId != null ? teacherId : "0" %>;
+        
+        if (teacherId === 0) {
+            Swal.fire('Error', 'Teacher ID not found. Please log in again.', 'error');
+            return;
         }
         
-        // Save all attendance
-    // Save all attendance
-function saveAllAttendance() {
-    const date = document.getElementById('attendanceDate').value;
+        if (Object.keys(attendanceChanges).length === 0) {
+            Swal.fire('No Changes', 'Please mark attendance for students', 'info');
+            return;
+        }
+        
+        console.log('Saving attendance:', { date, teacherId, attendanceChanges });
+        
+        document.getElementById('loading').style.display = 'flex';
+        
+        $.ajax({
+            url: 'AttendanceServlet',
+            method: 'POST',
+            data: {
+                action: 'saveAttendance',
+                date: date,
+                teacherId: teacherId,
+                attendance: JSON.stringify(attendanceChanges)
+            },
+            success: function(response) {
+                console.log('Server Response:', response);
+                document.getElementById('loading').style.display = 'none';
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message || 'Attendance saved successfully',
+                        timer: 2000
+                    }).then(() => {
+                        attendanceChanges = {};
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', response.message || 'Failed to save', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                document.getElementById('loading').style.display = 'none';
+                Swal.fire('Error', 'Failed to save attendance: ' + error, 'error');
+            }
+        });
+    }
+
+    // Load attendance for selected date
+    function loadAttendanceForDate() {
+        const date = document.getElementById('attendanceDate').value;
+        document.getElementById('selectedDateDisplay').textContent = date;
+        location.reload();
+    }
+
+    // View attendance records - UPDATED WITH LOGGING
     
-    // FIX: Get teacherId properly from JSP
-    const teacherId = <%= teacherId != null ? teacherId : "0" %>;
+ // ============================================
+// FIXED VIEW ATTENDANCE - WITH VISIBLE HEADERS
+// ============================================
+function viewAttendanceRecords() {
+    const startDate = document.getElementById('viewStartDate').value;
+    const endDate = document.getElementById('viewEndDate').value;
+    const classFilter = document.getElementById('viewClassFilter').value;
     
-    if (teacherId === 0) {
-        Swal.fire('Error', 'Teacher ID not found. Please log in again.', 'error');
+    console.log('📊 View Attendance Called:', { startDate, endDate, classFilter });
+    
+    if (!startDate || !endDate) {
+        Swal.fire('Error', 'Please select start and end dates', 'warning');
         return;
     }
-    
-    if (Object.keys(attendanceChanges).length === 0) {
-        Swal.fire('No Changes', 'Please mark attendance for students', 'info');
-        return;
-    }
-    
-    console.log('=== SAVING ATTENDANCE ===');
-    console.log('Date:', date);
-    console.log('Teacher ID:', teacherId);
-    console.log('Attendance Changes:', attendanceChanges);
-    console.log('JSON:', JSON.stringify(attendanceChanges));
     
     document.getElementById('loading').style.display = 'flex';
     
     $.ajax({
         url: 'AttendanceServlet',
-        method: 'POST',
+        method: 'GET',
+        dataType: 'json',
         data: {
-            action: 'saveAttendance',
-            date: date,
-            teacherId: teacherId,  // Now guaranteed to be a number
-            attendance: JSON.stringify(attendanceChanges)
+            action: 'viewAttendance',
+            startDate: startDate,
+            endDate: endDate,
+            class: classFilter
         },
         success: function(response) {
-            console.log('Server Response:', response);
             document.getElementById('loading').style.display = 'none';
             
-            if (response.success) {
+            console.log('✅ View Attendance Response:', response);
+            
+            let data = response;
+            if (typeof response === 'string') {
+                try {
+                    data = JSON.parse(response);
+                } catch (e) {
+                    console.error('Failed to parse response:', e);
+                    Swal.fire('Error', 'Invalid server response', 'error');
+                    return;
+                }
+            }
+            
+            if (data.success && data.records && data.records.length > 0) {
+                let html = '<div class="table-responsive">';
+                html += '<table class="table table-bordered table-striped table-hover">';
+                
+                // FIXED: Header with visible text
+                html += '<thead class="table-dark">'; // Use Bootstrap's table-dark class
+                html += '<tr>';
+                html += '<th>Date</th>';
+                html += '<th>Roll No</th>';
+                html += '<th>Student Name</th>';
+                html += '<th>Class</th>';
+                html += '<th>Status</th>';
+                html += '</tr>';
+                html += '</thead>';
+                
+                html += '<tbody>';
+                
+                data.records.forEach(record => {
+                    const badgeClass = record.status === 'present' ? 'badge-present' : 'badge-absent';
+                    const statusText = record.status.charAt(0).toUpperCase() + record.status.slice(1);
+                    
+                    html += '<tr>';
+                    html += '<td>' + record.date + '</td>';
+                    html += '<td>' + record.rollNo + '</td>';
+                    html += '<td>' + record.fullName + '</td>';
+                    html += '<td>' + record.className + '</td>';
+                    html += '<td><span class="attendance-badge ' + badgeClass + '">' + statusText + '</span></td>';
+                    html += '</tr>';
+                });
+                
+                html += '</tbody>';
+                html += '</table>';
+                html += '<div class="alert alert-info mt-3">';
+                html += '<i class="fas fa-info-circle"></i> Total Records: <strong>' + data.records.length + '</strong>';
+                html += '</div>';
+                html += '</div>';
+                
+                document.getElementById('viewAttendanceResults').innerHTML = html;
+                
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: response.message || 'Attendance saved successfully',
-                    timer: 2000
-                }).then(() => {
-                    attendanceChanges = {};
-                    window.location.reload();
+                    title: 'Records Loaded',
+                    text: 'Found ' + data.records.length + ' attendance records',
+                    timer: 2000,
+                    showConfirmButton: false
                 });
             } else {
-                Swal.fire('Error', response.message || 'Failed to save', 'error');
+                document.getElementById('viewAttendanceResults').innerHTML = 
+                    '<div class="alert alert-warning">' +
+                    '<i class="fas fa-exclamation-triangle"></i> ' +
+                    '<strong>No records found</strong><br>' +
+                    'Try selecting different dates or class filter.' +
+                    '</div>';
             }
         },
         error: function(xhr, status, error) {
-            console.error('AJAX Error:', status, error);
-            console.error('Response:', xhr.responseText);
             document.getElementById('loading').style.display = 'none';
-            Swal.fire('Error', 'Failed to save attendance: ' + error, 'error');
+            console.error('❌ AJAX Error:', { status, error, response: xhr.responseText });
+            Swal.fire('Error', 'Failed to load records: ' + error, 'error');
         }
     });
 }
-        
-        // Load attendance for selected date
-        function loadAttendanceForDate() {
-            const date = document.getElementById('attendanceDate').value;
-            const classFilter = document.getElementById('classFilter').value;
+    
+// ============================================
+// FIXED GENERATE REPORT - WITH VISIBLE HEADERS
+// ============================================
+function generateReport() {
+    const month = document.getElementById('reportMonth').value;
+    const year = document.getElementById('reportYear').value;
+    const classFilter = document.getElementById('reportClassFilter').value;
+    
+    console.log('📈 Generate Report Called:', { month, year, classFilter });
+    
+    document.getElementById('loading').style.display = 'flex';
+    
+    $.ajax({
+        url: 'AttendanceServlet',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            action: 'generateReport',
+            month: month,
+            year: year,
+            class: classFilter
+        },
+        success: function(response) {
+            document.getElementById('loading').style.display = 'none';
             
-            document.getElementById('selectedDateDisplay').textContent = date;
-            window.location.reload();
-        }
-        
-        // View attendance records
-        function viewAttendanceRecords() {
-            const startDate = document.getElementById('viewStartDate').value;
-            const endDate = document.getElementById('viewEndDate').value;
-            const classFilter = document.getElementById('viewClassFilter').value;
+            console.log('✅ Generate Report Response:', response);
             
-            if (!startDate || !endDate) {
-                Swal.fire('Error', 'Please select start and end dates', 'warning');
-                return;
-            }
-            
-            document.getElementById('loading').style.display = 'flex';
-            
-            $.ajax({
-                url: 'AttendanceServlet',
-                method: 'GET',
-                data: {
-                    action: 'viewAttendance',
-                    startDate: startDate,
-                    endDate: endDate,
-                    class: classFilter
-                },
-                success: function(response) {
-                    document.getElementById('loading').style.display = 'none';
-                    
-                    if (response.success && response.records) {
-                        let html = '<div class="table-responsive"><table class="table table-bordered">';
-                        html += '<thead><tr><th>Date</th><th>Roll No</th><th>Name</th><th>Class</th><th>Status</th></tr></thead>';
-                        html += '<tbody>';
-                        
-                        response.records.forEach(record => {
-                            const badgeClass = record.status === 'present' ? 'badge-present' : 'badge-absent';
-                            html += `<tr>
-                                <td>${record.date}</td>
-                                <td>${record.rollNo}</td>
-                                <td>${record.fullName}</td>
-                                <td>${record.className}</td>
-                                <td><span class="attendance-badge ${badgeClass}">${record.status}</span></td>
-                            </tr>`;
-                        });
-                        
-                        html += '</tbody></table></div>';
-                        document.getElementById('viewAttendanceResults').innerHTML = html;
-                    } else {
-                        document.getElementById('viewAttendanceResults').innerHTML = '<p class="text-center text-muted">No records found</p>';
-                    }
-                },
-                error: function() {
-                    document.getElementById('loading').style.display = 'none';
-                    Swal.fire('Error', 'Failed to load records', 'error');
-                }
-            });
-        }
-        
-        // Generate monthly report
-        function generateReport() {
-            const month = document.getElementById('reportMonth').value;
-            const year = document.getElementById('reportYear').value;
-            
-            document.getElementById('loading').style.display = 'flex';
-            
-            $.ajax({
-                url: 'AttendanceServlet',
-                method: 'GET',
-                data: {
-                    action: 'generateReport',
-                    month: month,
-                    year: year
-                },
-                success: function(response) {
-                    document.getElementById('loading').style.display = 'none';
-                    
-                    if (response.success && response.report) {
-                        let html = '<div class="table-responsive"><table class="table table-bordered">';
-                        html += '<thead><tr><th>Roll No</th><th>Name</th><th>Class</th><th>Present Days</th><th>Absent Days</th><th>Total Days</th><th>Percentage</th></tr></thead>';
-                        html += '<tbody>';
-                        
-                        response.report.forEach(student => {
-                            const percentage = parseFloat(student.percentage);
-                            const badgeClass = percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger';
-                            
-                            html += `<tr>
-                                <td>${student.rollNo}</td>
-                                <td>${student.fullName}</td>
-                                <td>${student.className}</td>
-                                <td>${student.presentDays}</td>
-                                <td>${student.absentDays}</td>
-                                <td>${student.totalDays}</td>
-                                <td><span class="badge ${badgeClass}">${student.percentage}%</span></td>
-                            </tr>`;
-                        });
-                        
-                        html += '</tbody></table></div>';
-                        document.getElementById('reportResults').innerHTML = html;
-                    } else {
-                        document.getElementById('reportResults').innerHTML = '<p class="text-center text-muted">No data found</p>';
-                    }
-                },
-                error: function() {
-                    document.getElementById('loading').style.display = 'none';
-                    Swal.fire('Error', 'Failed to generate report', 'error');
-                }
-            });
-        }
-        
-        // Search students
-        function searchStudents() {
-            const searchTerm = document.getElementById('searchStudent').value.toLowerCase();
-            const rows = document.querySelectorAll('#studentListBody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        }
-        
-        // Export to Excel (CSV format)
-        function exportToExcel() {
-            const month = document.getElementById('reportMonth').value;
-            const year = document.getElementById('reportYear').value;
-            
-            $.ajax({
-                url: 'AttendanceServlet',
-                method: 'GET',
-                data: {
-                    action: 'generateReport',
-                    month: month,
-                    year: year
-                },
-                success: function(response) {
-                    if (response.success && response.report) {
-                        let csv = 'Roll No,Name,Class,Present Days,Absent Days,Total Days,Percentage\n';
-                        
-                        response.report.forEach(student => {
-                            csv += `${student.rollNo},${student.fullName},${student.className},`;
-                            csv += `${student.presentDays},${student.absentDays},${student.totalDays},${student.percentage}%\n`;
-                        });
-                        
-                        const blob = new Blob([csv], { type: 'text/csv' });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `attendance_report_${year}_${month}.csv`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                        
-                        Swal.fire('Success', 'Report exported successfully', 'success');
-                    }
-                },
-                error: function() {
-                    Swal.fire('Error', 'Failed to export report', 'error');
-                }
-            });
-        }
-        
-        // Load dashboard chart
-        function loadDashboardChart() {
-            $.ajax({
-                url: 'AttendanceServlet',
-                method: 'GET',
-                data: { action: 'getChartData' },
-                success: function(response) {
-                    if (response.success && response.chartData) {
-                        const ctx = document.getElementById('attendanceChart');
-                        
-                        if (window.attendanceChartInstance) {
-                            window.attendanceChartInstance.destroy();
-                        }
-                        
-                        window.attendanceChartInstance = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: response.chartData.labels,
-                                datasets: [{
-                                    label: 'Present',
-                                    data: response.chartData.present,
-                                    borderColor: '#06d6a0',
-                                    backgroundColor: 'rgba(6, 214, 160, 0.1)',
-                                    tension: 0.4
-                                }, {
-                                    label: 'Absent',
-                                    data: response.chartData.absent,
-                                    borderColor: '#ef476f',
-                                    backgroundColor: 'rgba(239, 71, 111, 0.1)',
-                                    tension: 0.4
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    legend: { position: 'top' }
-                                },
-                                scales: {
-                                    y: { beginAtZero: true }
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-        }
-        
-        // Load chart on page load
-        $(document).ready(function() {
-            console.log('=== PAGE LOADED ===');
-            console.log('jQuery loaded:', typeof jQuery !== 'undefined');
-            console.log('SweetAlert loaded:', typeof Swal !== 'undefined');
-            console.log('Chart.js loaded:', typeof Chart !== 'undefined');
-            
-            loadDashboardChart();
-            
-            // Setup attendance button click handlers
-           // setupAttendanceButtons();
-            
-            // Test button click
-            console.log('Testing button clicks...');
-            const testButton = document.querySelector('.btn-present');
-            if (testButton) {
-                console.log('✅ Present button found');
-            } else {
-                console.error('❌ Present button NOT found');
-            }
-        });
-        
-        // Setup attendance button event listeners
-        function setupAttendanceButtons() {
-            console.log('=== Setting up attendance buttons ===');
-            
-            // Check which section is active
-            const activeSection = document.querySelector('.page-section.active');
-            console.log('Active section:', activeSection ? activeSection.id : 'none');
-            
-            // Check if attendance table exists
-            const attendanceTable = document.getElementById('attendanceTable');
-            const studentTableBody = document.getElementById('studentTableBody');
-            console.log('Attendance table exists:', !!attendanceTable);
-            console.log('Student table body exists:', !!studentTableBody);
-            
-            if (studentTableBody) {
-                const rows = studentTableBody.querySelectorAll('tr[data-student-id]');
-                console.log('Number of student rows:', rows.length);
-            }
-            
-            // Use event delegation for dynamically loaded content
-            /*$(document).on('click', '.btn-present, .btn-absent', function(e) {
-                e.preventDefault();
-                
-                const button = $(this);
-                const studentId = button.attr('data-student-id');
-                const action = button.attr('data-action');
-                
-                console.log('Button clicked:', {
-                    studentId: studentId,
-                    action: action,
-                    button: button
-                });
-                
-                if (!studentId || !action) {
-                    console.error('Missing data attributes!');
-                    alert('Error: Missing student ID or action!');
+            let data = response;
+            if (typeof response === 'string') {
+                try {
+                    data = JSON.parse(response);
+                } catch (e) {
+                    console.error('Failed to parse response:', e);
+                    Swal.fire('Error', 'Invalid server response', 'error');
                     return;
                 }
-                
-                markStatus(studentId, action);
-            });*/
+            }
             
-            console.log('✅ Attendance buttons setup complete');
+            if (data.success && data.report && data.report.length > 0) {
+                let html = '<div class="table-responsive">';
+                html += '<table class="table table-bordered table-striped table-hover">';
+                
+                // FIXED: Header with proper styling
+                html += '<thead style="background-color: #343a40; color: white;">';
+                html += '<tr>';
+                html += '<th style="color: white; font-weight: 600;">Roll No</th>';
+                html += '<th style="color: white; font-weight: 600;">Student Name</th>';
+                html += '<th style="color: white; font-weight: 600;">Class</th>';
+                html += '<th style="color: white; font-weight: 600;">Present Days</th>';
+                html += '<th style="color: white; font-weight: 600;">Absent Days</th>';
+                html += '<th style="color: white; font-weight: 600;">Total Days</th>';
+                html += '<th style="color: white; font-weight: 600;">Attendance %</th>';
+                html += '</tr>';
+                html += '</thead>';
+                
+                html += '<tbody>';
+                
+                data.report.forEach(student => {
+                    const percentage = parseFloat(student.percentage);
+                    let badgeClass = 'bg-danger';
+                    if (percentage >= 75) badgeClass = 'bg-success';
+                    else if (percentage >= 50) badgeClass = 'bg-warning';
+                    
+                    html += '<tr>';
+                    html += '<td>' + student.rollNo + '</td>';
+                    html += '<td>' + student.fullName + '</td>';
+                    html += '<td>' + student.className + '</td>';
+                    html += '<td><span class="badge bg-success">' + student.presentDays + '</span></td>';
+                    html += '<td><span class="badge bg-danger">' + student.absentDays + '</span></td>';
+                    html += '<td><strong>' + student.totalDays + '</strong></td>';
+                    html += '<td><span class="badge ' + badgeClass + '">' + student.percentage + '%</span></td>';
+                    html += '</tr>';
+                });
+                
+                html += '</tbody>';
+                html += '</table>';
+                html += '<div class="alert alert-info mt-3">';
+                html += '<i class="fas fa-info-circle"></i> Total Students: <strong>' + data.report.length + '</strong>';
+                html += '</div>';
+                html += '</div>';
+                
+                document.getElementById('reportResults').innerHTML = html;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Report Generated',
+                    text: 'Report generated for ' + data.report.length + ' students',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                document.getElementById('reportResults').innerHTML = 
+                    '<div class="alert alert-warning">' +
+                    '<i class="fas fa-exclamation-triangle"></i> ' +
+                    '<strong>No data available</strong><br>' +
+                    'No attendance records found for the selected criteria.' +
+                    '</div>';
+            }
+        },
+        error: function(xhr, status, error) {
+            document.getElementById('loading').style.display = 'none';
+            console.error('❌ AJAX Error:', { status, error, response: xhr.responseText });
+            Swal.fire('Error', 'Failed to generate report: ' + error, 'error');
         }
+    });
+}
+
+// ============================================
+// FIXED EXPORT TO EXCEL - WITH PROPER HEADERS
+// ============================================
+function exportToExcel() {
+    const month = document.getElementById('reportMonth').value;
+    const year = document.getElementById('reportYear').value;
+    const classFilter = document.getElementById('reportClassFilter').value;
+    
+    console.log('📥 Export to Excel:', { month, year, classFilter });
+    
+    // First, check if report is already generated
+    const reportTable = document.querySelector('#reportResults table');
+    if (!reportTable) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Report Found',
+            text: 'Please generate the report first by clicking "Generate Report" button',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    document.getElementById('loading').style.display = 'flex';
+    
+    $.ajax({
+        url: 'AttendanceServlet',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            action: 'generateReport',
+            month: month,
+            year: year,
+            class: classFilter
+        },
+        success: function(response) {
+            document.getElementById('loading').style.display = 'none';
+            
+            console.log('✅ Export Response:', response);
+            
+            let data = response;
+            if (typeof response === 'string') {
+                try {
+                    data = JSON.parse(response);
+                } catch (e) {
+                    console.error('Failed to parse response:', e);
+                    Swal.fire('Error', 'Invalid server response', 'error');
+                    return;
+                }
+            }
+            
+            if (data.success && data.report && data.report.length > 0) {
+                // Create CSV with BOM for proper Excel encoding
+                let csv = '\uFEFF'; // UTF-8 BOM
+                
+                // Add headers
+                csv += 'Roll No,Student Name,Class,Present Days,Absent Days,Total Days,Attendance Percentage\n';
+                
+                // Add data rows
+                data.report.forEach(student => {
+                    csv += student.rollNo + ',';
+                    csv += '"' + student.fullName + '",';
+                    csv += '"' + student.className + '",';
+                    csv += student.presentDays + ',';
+                    csv += student.absentDays + ',';
+                    csv += student.totalDays + ',';
+                    csv += student.percentage + '%\n';
+                });
+                
+                // Create blob and download
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Create filename
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const monthName = monthNames[parseInt(month) - 1];
+                const classFilterSafe = classFilter ? '_' + classFilter.split(' ').join('_') : '_AllClasses';
+                a.download = 'Attendance_Report_' + monthName + '_' + year + classFilterSafe + '.csv';
+                
+                // Trigger download
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful',
+                    html: '<strong>' + data.report.length + ' students</strong> exported successfully!<br>' +
+                          'File: <code>' + a.download + '</code>',
+                    timer: 3000
+                });
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No Data',
+                    text: 'No data available to export. Please generate a report first.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            document.getElementById('loading').style.display = 'none';
+            console.error('❌ Export Error:', error);
+            Swal.fire('Error', 'Failed to export report: ' + error, 'error');
+        }
+    });
+}
+
+
+    // Load dashboard chart
+    function loadDashboardChart() {
+        $.ajax({
+            url: 'AttendanceServlet',
+            method: 'GET',
+            data: { action: 'getChartData' },
+            success: function(response) {
+                console.log('📊 Chart Data Response:', response);
+                
+                if (response.success && response.chartData) {
+                    const ctx = document.getElementById('attendanceChart');
+                    
+                    if (window.attendanceChartInstance) {
+                        window.attendanceChartInstance.destroy();
+                    }
+                    
+                    window.attendanceChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: response.chartData.labels,
+                            datasets: [{
+                                label: 'Present',
+                                data: response.chartData.present,
+                                borderColor: '#06d6a0',
+                                backgroundColor: 'rgba(6, 214, 160, 0.1)',
+                                tension: 0.4
+                            }, {
+                                label: 'Absent',
+                                data: response.chartData.absent,
+                                borderColor: '#ef476f',
+                                backgroundColor: 'rgba(239, 71, 111, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('❌ Chart Error:', error);
+            }
+        });
+    }
+
+    // Initialize on page load
+    $(document).ready(function() {
+        console.log('✅ Page loaded successfully');
+        loadDashboardChart();
         
-        // Add global error handler
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            console.error('JavaScript Error:', {
-                message: msg,
-                url: url,
-                lineNo: lineNo,
-                columnNo: columnNo,
-                error: error
-            });
-            return false;
+        // Set default dates for View Attendance
+        const today = new Date();
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         };
+        
+        document.getElementById('viewStartDate').value = formatDate(lastWeek);
+        document.getElementById('viewEndDate').value = formatDate(today);
+        
+        console.log('📅 Default dates set:', {
+            start: formatDate(lastWeek),
+            end: formatDate(today)
+        });
+    });
     </script>
 </body>
 </html>
