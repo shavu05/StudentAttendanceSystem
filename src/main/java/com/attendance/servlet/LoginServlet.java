@@ -63,49 +63,32 @@ public class LoginServlet extends HttpServlet {
         // Pass the HASHED password to authenticate method
         User user = userDAO.authenticate(username, hashedPassword, role);
         
-        if (user != null) {
-            // Create session
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            session.setAttribute("username", user.getUsername());
-            session.setAttribute("role", user.getRole());
-            session.setAttribute("fullName", user.getFullName());
-            session.setMaxInactiveInterval(30 * 60); // 30 minutes
+     // In your LoginServlet.java, find the doPost method
+     // Look for where you create the session after successful authentication
+     // It should look something like this:
+
+     if (user != null) {
+         HttpSession session = request.getSession(true);
+         
+         session.setAttribute("user", user);
+         session.setAttribute("userId", user.getId());     // ← ADD THIS LINE
+         session.setAttribute("username", user.getUsername());
+         session.setAttribute("fullName", user.getFullName());
+         session.setAttribute("email", user.getEmail());
+         session.setAttribute("role", user.getRole());
+         
+         System.out.println("✅ Login SUCCESS: " + user.getFullName() + " logged in as " + user.getRole());
+         System.out.println("Session created - User ID: " + user.getId());
+         
+         // Redirect based on role
+         if ("admin".equals(user.getRole())) {
+             response.sendRedirect("adminDashboard.jsp");
+         } else if ("teacher".equals(user.getRole())) {
+             response.sendRedirect("teacherDashboard.jsp");
+         } else if ("student".equals(user.getRole())) {
+             response.sendRedirect("dashboard.jsp");
+         }
+     }
             
-            System.out.println("✅ Login SUCCESS: " + user.getFullName() + " logged in as " + user.getRole());
-            System.out.println("Session created - User ID: " + user.getId());
-            
-            // Redirect based on role
-            switch (user.getRole()) {
-                case "admin":
-                    response.sendRedirect("adminDashboard.jsp");
-                    break;
-                case "teacher":
-                    response.sendRedirect("teacherDashboard.jsp");
-                    break;
-                case "student":
-                    response.sendRedirect("studentDashboard.jsp");
-                    break;
-                default:
-                    request.setAttribute("error", "⚠️ Invalid user role. Please contact administrator.");
-                    request.getRequestDispatcher("login.jsp").forward(request, response);
-            }
-        } else {
-            System.out.println("❌ Login FAILED: Invalid credentials for user: " + username);
-            
-            // More specific error messages
-            String errorMessage;
-            if (role == null || role.trim().isEmpty()) {
-                errorMessage = "⚠️ Please select a role (Admin, Teacher, or Student)";
-            } else {
-                errorMessage = "❌ Invalid username, password, or role. Please try again.";
-            }
-            
-            request.setAttribute("error", errorMessage);
-            request.setAttribute("username", username); // Keep username in form
-            request.setAttribute("role", role); // Keep selected role
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-        }
-    }
-    
-}
+           
+}}
