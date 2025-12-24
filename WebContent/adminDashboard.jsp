@@ -1120,7 +1120,7 @@
                     </div>
                     <div class="stat-value"><%= totalUsers %></div>
                     <div class="stat-label">Total Users</div>
-                    <small class="text-success">+5 this month</small>
+                    <small class="text-success"> </small>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon admin">
@@ -2314,7 +2314,7 @@ function updateUser() {
      Swal.fire("Validation Error", "Please fill all required fields", "warning");
      return;
  }
- 
+ //paswd
  var password = formData.get('password');
  if (password && password.length < 6) {
      Swal.fire("Validation Error", "Password must be at least 6 characters", "warning");
