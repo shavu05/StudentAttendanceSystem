@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-@WebServlet("/login")
+@WebServlet(name = "LoginServlet", urlPatterns = {"/login", "/LoginServlet"})
 public class LoginServlet extends HttpServlet {
     
     // Password hashing method
@@ -44,27 +44,23 @@ public class LoginServlet extends HttpServlet {
         if ("logout".equals(action)) {
             HttpSession session = request.getSession(false);
             if (session != null) {
-                // Get username before invalidating for logging
                 String username = (String) session.getAttribute("username");
-                System.out.println("✅ User logged out: " + username);
+                String role = (String) session.getAttribute("role");
+                System.out.println("✅ User logged out: " + username + " (Role: " + role + ")");
                 session.invalidate();
             }
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.jsp?message=Logged out successfully");
             return;
         }
         
         // ============================================
-        // HANDLE LOGIN ACTION (existing code)
+        // HANDLE LOGIN ACTION
         // ============================================
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String role = request.getParameter("role");
         
         System.out.println("Login attempt - Username: " + username + ", Role: " + role);
-        System.out.println("DEBUG - Raw parameters:");
-        System.out.println("Username: [" + username + "]");
-        System.out.println("Password: [" + password + "]");
-        System.out.println("Role: [" + role + "]");
         
         // Validate input
         if (username == null || password == null || role == null ||
@@ -77,17 +73,15 @@ public class LoginServlet extends HttpServlet {
         
         // HASH THE PASSWORD BEFORE AUTHENTICATION
         String hashedPassword = hashPassword(password);
-        System.out.println("DEBUG: Hashed password: " + hashedPassword);
         
         UserDAO userDAO = new UserDAO();
-        // Pass the HASHED password to authenticate method
         User user = userDAO.authenticate(username, hashedPassword, role);
         
         if (user != null) {
             HttpSession session = request.getSession(true);
             
             session.setAttribute("user", user);
-            session.setAttribute("userId", user.getId());     // ← ADD THIS LINE
+            session.setAttribute("userId", user.getId());
             session.setAttribute("username", user.getUsername());
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("email", user.getEmail());
@@ -96,35 +90,27 @@ public class LoginServlet extends HttpServlet {
             System.out.println("✅ Login SUCCESS: " + user.getFullName() + " logged in as " + user.getRole());
             System.out.println("Session created - User ID: " + user.getId());
             
-            // Redirect based on role - ADD RETURN STATEMENTS
+            // Redirect based on role
             if ("admin".equals(user.getRole())) {
                 response.sendRedirect("adminDashboard.jsp");
-                return; // ← ADD THIS
+                return;
             } else if ("teacher".equals(user.getRole())) {
                 response.sendRedirect("teacherDashboard.jsp");
-                return; // ← ADD THIS
+                return;
             } else if ("student".equals(user.getRole())) {
                 response.sendRedirect("studentDashboard.jsp");
-                return; // ← ADD THIS
+                return;
             }
         } else {
-            // If authentication failed
             System.out.println("❌ Login FAILED: Invalid credentials for user: " + username);
             
-            // More specific error messages
-            String errorMessage;
-            if (role == null || role.trim().isEmpty()) {
-                errorMessage = "⚠️ Please select a role (Admin, Teacher, or Student)";
-            } else {
-                errorMessage = "❌ Invalid username, password, or role. Please try again.";
-            }
-            
+            String errorMessage = "❌ Invalid username, password, or role. Please try again.";
             
             request.setAttribute("error", errorMessage);
-            request.setAttribute("username", username); // Keep username in form
-            request.setAttribute("role", role); // Keep selected role
+            request.setAttribute("username", username);
+            request.setAttribute("role", role);
             request.getRequestDispatcher("login.jsp").forward(request, response);
-            return; // ← ADD THIS
+            return;
         }
     }
     
@@ -132,16 +118,17 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Also handle logout via GET request
+        // Handle logout via GET request
         String action = request.getParameter("action");
         if ("logout".equals(action)) {
             HttpSession session = request.getSession(false);
             if (session != null) {
                 String username = (String) session.getAttribute("username");
-                System.out.println("✅ User logged out (GET): " + username);
+                String role = (String) session.getAttribute("role");
+                System.out.println("✅ User logged out (GET): " + username + " (Role: " + role + ")");
                 session.invalidate();
             }
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.jsp?message=Logged out successfully");
             return;
         }
         

@@ -556,70 +556,71 @@
     </section>
     
     <!-- Features Section -->
-    <section id="features" class="features-section">
-        <div class="container">
-            <h2 class="section-title">Powerful Features for Modern Education</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h4>Real-time Tracking</h4>
-                        <p>Monitor attendance in real-time with instant notifications and updates across all devices.</p>
+    <!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <h2 class="section-title">Powerful Features for Modern Education</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <h4>Advanced Analytics</h4>
-                        <p>Generate comprehensive reports with predictive insights and trend analysis.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h4>Enterprise Security</h4>
-                        <p>Bank-level encryption and multi-factor authentication to protect sensitive data.</p>
-                    </div>
+                    <h4>Easy Attendance Marking</h4>
+                    <p>Teachers can quickly mark attendance for all students with present/absent buttons and save with one click.</p>
                 </div>
             </div>
-            
-            <div class="row g-4 mt-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <h4>Mobile Ready</h4>
-                        <p>Access from any device with our responsive web application and mobile-friendly interface.</p>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
                     </div>
+                    <h4>Attendance Reports</h4>
+                    <p>Generate monthly attendance reports with percentage calculations and export to Excel format.</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-file-export"></i>
-                        </div>
-                        <h4>Automated Reports</h4>
-                        <p>Generate and export detailed attendance reports in multiple formats with one click.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <h4>Smart Alerts</h4>
-                        <p>Receive automatic notifications for low attendance, trends, and important updates.</p>
-                    </div>
+                    <h4>Secure Authentication</h4>
+                    <p>Password encryption with SHA-256 hashing and role-based access control for data protection.</p>
                 </div>
             </div>
         </div>
-    </section>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Mobile Responsive</h4>
+                    <p>Access from any device with our fully responsive web application that works on phones and tablets.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <h4>Excel Export</h4>
+                    <p>Export attendance records and reports to Excel/CSV format for offline analysis and record keeping.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h4>Role-Based Dashboards</h4>
+                    <p>Separate dashboards for Admins, Teachers, and Students with customized features for each role.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
     
     <!-- CTA Section -->
     <section class="cta-section">
@@ -630,9 +631,7 @@
                 streamline their attendance management and improve academic outcomes.
             </p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="login.jsp" class="btn btn-cta">
-                    <i class="fas fa-user-plus me-2"></i>Create Account
-                </a>
+               
                 <a href="login.jsp" class="btn btn-outline-light btn-lg">
                     <i class="fas fa-sign-in-alt me-2"></i>Login Now
                 </a>
@@ -777,5 +776,19 @@
             observer.observe(el);
         });
     </script>
+    <!-- Footer Credit -->
+    <footer class="app-footer">
+        <div class="container text-center">
+            <p class="mb-1">
+                <i class="fas fa-code"></i> 
+                <strong>Created & Maintained by</strong> 
+                <span class="developer-name">Shravani Sanika</span>
+            </p>
+            <p class="mb-0 small text-muted">
+                Student Attendance Management System © 2024-2025
+            </p>
+        </div>
+    </footer>
+</body>
 </body>
 </html>

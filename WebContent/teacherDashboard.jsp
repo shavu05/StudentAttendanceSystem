@@ -281,6 +281,51 @@ table.table thead {
                 margin-left: 0;
             }
         }
+        
+
+.credit-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4361ee, #764ba2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+    font-size: 13px;
+    z-index: 9999;
+    animation: fadeInUp 0.5s ease;
+}
+
+.credit-badge i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.credit-badge strong {
+    font-weight: 700;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .credit-badge {
+        bottom: 10px;
+        right: 10px;
+        font-size: 11px;
+        padding: 8px 15px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -772,6 +817,12 @@ table.table thead {
                 </div>
             </div>
         </div>
+        <!-- Footer Credit -->
+        <div class="credit-badge">
+    <i class="fas fa-user-graduate"></i>
+    <span>Created by <strong>Shravani Sanika</strong></span>
+</div>
+<!-- End main-content -->
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1338,22 +1389,21 @@ function exportToExcel() {
     
     
  // Add this function to your JavaScript section
-    function confirmLogout() {
-        Swal.fire({
-            title: 'Logout?',
-            text: 'Are you sure you want to logout?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Logout',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#ef476f'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to logout servlet
-                window.location.href = 'LoginServlet?action=logout';
-            }
-        });
-    }
+function confirmLogout() {
+    Swal.fire({
+        title: 'Logout?',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Logout',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#ef476f'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'login?action=logout'; // Fixed URL
+        }
+    });
+}
  
     </script>
 </body>

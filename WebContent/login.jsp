@@ -553,27 +553,14 @@
                             <strong>Real-time Analytics:</strong> Instant insights and attendance tracking
                         </div>
                     </li>
-                    <li>
-                        <div class="feature-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div>
-                            <strong>Smart Notifications:</strong> Get alerts for attendance trends
-                        </div>
-                    </li>
+                   
                 </ul>
                 
                 <div class="testimonial">
                     <p class="testimonial-text">
                         "EduTrack Pro has simplified our attendance management. The interface is intuitive and reports are generated automatically."
                     </p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">SM</div>
-                        <div>
-                            <div class="author-name">Sarah Miller</div>
-                            <div class="author-role">Professor, Computer Science</div>
-                        </div>
-                    </div>
+                   
                 </div>
             </div>
         </div>
@@ -682,12 +669,7 @@
                 </form>
                 
                 <!-- Create Account Link -->
-                <div class="create-account">
-                    <a href="#contactAdmin">
-                        <i class="fas fa-user-plus me-2"></i>
-                        Need an account? Contact your administrator
-                    </a>
-                </div>
+              
                 
                 <!-- Back to Home -->
                 <div class="back-home">
@@ -867,5 +849,14 @@
             }
         });
     </script>
+    <!-- Footer Credit -->
+    <div class="text-center mt-4" style="color: rgba(255,255,255,0.8);">
+        <p class="mb-0">
+            <i class="fas fa-code"></i> 
+            Created & Maintained by <strong>Shravani Sanika</strong>
+        </p>
+    </div>
+</body>
+
 </body>
 </html>

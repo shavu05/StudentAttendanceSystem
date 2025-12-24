@@ -514,6 +514,98 @@
                 gap: 15px;
             }
         }
+        
+        .app-footer {
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(118, 75, 162, 0.1));
+    padding: 20px 0;
+    margin-top: 50px;
+    border-top: 2px solid rgba(67, 97, 238, 0.2);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-footer p {
+    color: #2d3748;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.app-footer .developer-name {
+    color: #4361ee;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+}
+
+.app-footer i {
+    color: #4361ee;
+    margin-right: 5px;
+}
+
+.app-footer .text-muted {
+    color: #6c757d !important;
+    font-size: 12px;
+}
+
+/* For pages with fixed sidebars (Admin Dashboard) */
+.main-content .app-footer {
+    margin-left: 0;
+    margin-top: 30px;
+}
+</style>
+
+<!-- ============================================
+     ALTERNATIVE VERSION - Minimal Floating Badge
+     ============================================ -->
+
+<!-- Floating Credit Badge (Alternative) -->
+<div class="credit-badge">
+    <i class="fas fa-user-graduate"></i>
+    <span>Created by <strong>Shravani Sanika</strong></span>
+</div>
+
+<style>
+.credit-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4361ee, #764ba2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;s
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+    font-size: 13px;
+    z-index: 9999;
+    animation: fadeInUp 0.5s ease;
+}
+
+.credit-badge i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.credit-badge strong {
+    font-weight: 700;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .credit-badge {
+        bottom: 10px;
+        right: 10px;
+        font-size: 11px;
+        padding: 8px 15px;
+    }
+}
     </style>
 </head>
 <body>
@@ -525,12 +617,14 @@
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
                 <span class="d-none d-sm-inline">Welcome, <strong><%= studentName %></strong></span>
-                <form action="LoginServlet" method="post" style="margin: 0;">
-                    <input type="hidden" name="action" value="logout">
-                    <button type="submit" class="btn btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </form>
+                
+                
+             <button type="button" class="btn btn-logout" onclick="confirmLogout()">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</button>
+
+                
+                
             </div>
         </div>
     </nav>
@@ -743,6 +837,9 @@
                 </table>
             </div>
         </div>
+        <!-- Footer Credit -->
+<!-- Professional Footer Credit -->
+
     </div>
 
     <!-- Scripts -->
@@ -814,6 +911,13 @@
         console.log('Total Days:', totalDays);
         console.log('Present Days:', presentDays);
         console.log('Absent Days:', absentDays);
+        
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login?action=logout';
+            }
+        }
+        
     </script>
 </body>
 </html>
