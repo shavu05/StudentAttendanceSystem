@@ -309,39 +309,68 @@
         </div>
 
         <!-- View Attendance Section -->
-        <div id="view-attendance" class="page-section">
-            <div class="header-card">
-                <h2>View Attendance Records</h2>
-                <p class="text-muted mb-0">View attendance history</p>
+<!-- View Attendance Section - ENHANCED -->
+<div id="view-attendance" class="page-section">
+    <div class="header-card">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2><i class="fas fa-list-alt"></i> View Attendance Records</h2>
+                <p class="text-muted mb-0">View and export attendance history</p>
             </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-success" id="exportViewBtn" onclick="exportViewedAttendance()" style="display: none;">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+    </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div class="row">
+    <div class="card mb-4">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="viewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="range-tab" data-bs-toggle="tab" 
+                            data-bs-target="#range-view" type="button" role="tab">
+                        <i class="fas fa-calendar-week"></i> Date Range
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="single-tab" data-bs-toggle="tab" 
+                            data-bs-target="#single-view" type="button" role="tab">
+                        <i class="fas fa-calendar-day"></i> Specific Date
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="viewTabsContent">
+                
+                <!-- Date Range Tab -->
+                <div class="tab-pane fade show active" id="range-view" role="tabpanel">
+                    <div class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label>Start Date:</label>
+                            <label class="form-label"><i class="fas fa-calendar-alt text-primary"></i> Start Date</label>
                             <input type="date" class="form-control" id="viewStartDate">
                         </div>
                         <div class="col-md-3">
-                            <label>End Date:</label>
+                            <label class="form-label"><i class="fas fa-calendar-alt text-danger"></i> End Date</label>
                             <input type="date" class="form-control" id="viewEndDate" value="<%= today %>">
                         </div>
                         <div class="col-md-3">
-                            <label>Class:</label>
+                            <label class="form-label"><i class="fas fa-filter"></i> Class Filter</label>
                             <select class="form-select" id="viewClassFilter">
                                 <option value="">All Classes</option>
                                 <%
                                     try {
-                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                        conn = DatabaseConnection.getConnection();
+                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL AND class != '' ORDER BY class";
                                         pst = conn.prepareStatement(classSQL);
                                         rs = pst.executeQuery();
                                         while (rs.next()) {
                                             String className = rs.getString("class");
-                                            if (className != null && !className.trim().isEmpty()) {
                                 %>
                                 <option value="<%= className %>"><%= className %></option>
                                 <%
-                                            }
                                         }
                                         rs.close();
                                         pst.close();
@@ -352,20 +381,70 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-primary w-100" onclick="viewAttendanceRecords()">
-                                <i class="fas fa-search"></i> Search
+                            <button class="btn btn-primary w-100" onclick="viewAttendanceByRange()">
+                                <i class="fas fa-search"></i> Search Records
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div id="viewAttendanceResults">
-                        <p class="text-center text-muted">Select dates and click Search to view records</p>
+                
+                <!-- Single Date Tab -->
+                <div class="tab-pane fade" id="single-view" role="tabpanel">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fas fa-calendar-check text-success"></i> Select Date</label>
+                            <input type="date" class="form-control" id="viewSingleDate" value="<%= today %>">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fas fa-filter"></i> Class Filter</label>
+                            <select class="form-select" id="viewSingleClassFilter">
+                                <option value="">All Classes</option>
+                                <%
+                                    try {
+                                        String classSQL2 = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL AND class != '' ORDER BY class";
+                                        pst = conn.prepareStatement(classSQL2);
+                                        rs = pst.executeQuery();
+                                        while (rs.next()) {
+                                            String className = rs.getString("class");
+                                %>
+                                <option value="<%= className %>"><%= className %></option>
+                                <%
+                                        }
+                                        rs.close();
+                                        pst.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                %>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-success w-100" onclick="viewAttendanceByDate()">
+                                <i class="fas fa-eye"></i> View Attendance
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-table"></i> Attendance Records</h5>
+            <div id="recordStats" class="text-muted"></div>
+        </div>
+        <div class="card-body">
+            <div id="viewAttendanceResults">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Select date range or specific date and click Search to view records</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Reports Section -->
         <div id="reports" class="page-section">
@@ -534,13 +613,19 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 <script>
-    // Values coming from JSP / session
-    const TEACHER_ID = '<%= session.getAttribute("teacherId") %>';
+    // Values coming from JSP / session - FIXED
+    const TEACHER_ID = '<%= session.getAttribute("userId") != null ? session.getAttribute("userId") : 0 %>';
+    console.log('🔐 Teacher ID from session:', TEACHER_ID);
 </script>
 
-<script src="js/attendance.js"></script>
+
+<script src="js/teacher.js"></script>
 
 </body>
 </html>
