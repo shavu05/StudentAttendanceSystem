@@ -1,0 +1,291 @@
+:root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #06d6a0;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+        }
+        
+        body {
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            width: 260px;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Add this to your existing CSS in the <style> section */
+
+/* Fix for table headers */
+.table thead th {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    font-weight: 600;
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+/* Bootstrap table-dark alternative for dark headers */
+.table-dark {
+    background-color: #343a40 !important;
+}
+
+.table-dark th {
+    color: #fff !important;
+    background-color: #343a40 !important;
+    border-color: #454d55 !important;
+}
+
+/* Ensure all tables have proper styling */
+table.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table.table thead {
+    background-color: #f8f9fa;
+}
+
+/* Fix for action buttons visibility */
+.btn-present, .btn-absent {
+    margin: 2px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Make sure table data is visible */
+.table td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+
+/* Student list table fixes */
+#studentListBody tr td {
+    padding: 8px;
+}
+        .sidebar .logo {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.85);
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        
+        .header-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-card .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px;
+            font-weight: 600;
+        }
+        
+        .btn-present {
+            background: var(--success-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-present:hover {
+            background: #05c494;
+            color: white;
+        }
+        
+        .btn-absent {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-absent:hover {
+            background: #d93d5f;
+            color: white;
+        }
+        
+        .attendance-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-present {
+            background: rgba(6, 214, 160, 0.2);
+            color: var(--success-color);
+        }
+        
+        .badge-absent {
+            background: rgba(239, 71, 111, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .page-section {
+            display: none;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -260px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+
+.credit-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4361ee, #764ba2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+    font-size: 13px;
+    z-index: 9999;
+    animation: fadeInUp 0.5s ease;
+}
+
+.credit-badge i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.credit-badge strong {
+    font-weight: 700;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .credit-badge {
+        bottom: 10px;
+        right: 10px;
+        font-size: 11px;
+        padding: 8px 15px;
+    }
+}
