@@ -720,7 +720,7 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small>MCA Project by Shravani | Student ID: [Your ID] | University: [Your University]</small>
+                    <small>MCA Project by Shravani & Sanika  </small>
                 </div>
             </div>
         </div>
@@ -776,19 +776,7 @@
             observer.observe(el);
         });
     </script>
-    <!-- Footer Credit -->
-    <footer class="app-footer">
-        <div class="container text-center">
-            <p class="mb-1">
-                <i class="fas fa-code"></i> 
-                <strong>Created & Maintained by</strong> 
-                <span class="developer-name">Shravani Sanika</span>
-            </p>
-            <p class="mb-0 small text-muted">
-                Student Attendance Management System © 2024-2025
-            </p>
-        </div>
-    </footer>
+   
 </body>
 </body>
 </html>
