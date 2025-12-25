@@ -447,90 +447,171 @@
 </div>
 
         <!-- Reports Section -->
-        <div id="reports" class="page-section">
-            <div class="header-card">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h2>Attendance Reports</h2>
-                        <p class="text-muted mb-0">Generate and export reports</p>
+<!-- Reports Section - ENHANCED -->
+<div id="reports" class="page-section">
+    <div class="header-card">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2><i class="fas fa-chart-bar"></i> Attendance Reports</h2>
+                <p class="text-muted mb-0">Generate and export reports</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-filter"></i> Report Type</h5>
+        </div>
+        <div class="card-body">
+            <!-- Report Type Selection -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="reportType" id="monthlyReport" value="monthly" checked onchange="toggleReportType()">
+                        <label class="btn btn-outline-primary" for="monthlyReport">
+                            <i class="fas fa-calendar-alt"></i> Monthly Report
+                        </label>
+                        
+                        <input type="radio" class="btn-check" name="reportType" id="yearlyReport" value="yearly" onchange="toggleReportType()">
+                        <label class="btn btn-outline-success" for="yearlyReport">
+                            <i class="fas fa-calendar"></i> Yearly Report
+                        </label>
                     </div>
-                    <div class="col-md-6 text-end">
-                        <button class="btn btn-success" onclick="exportToExcel()">
-                            <i class="fas fa-file-excel"></i> Export to Excel
+                </div>
+            </div>
+
+            <!-- Monthly Report Section -->
+            <div id="monthlyReportSection">
+                <h6 class="mb-3"><i class="fas fa-calendar-month"></i> Monthly Attendance Summary</h6>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Month:</label>
+                        <select class="form-select" id="reportMonth">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12" selected>December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Year:</label>
+                        <select class="form-select" id="reportYear">
+                            <%
+                                int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                                for (int i = currentYear; i >= currentYear - 5; i--) {
+                            %>
+                            <option value="<%= i %>" <%= i == currentYear ? "selected" : "" %>><%= i %></option>
+                            <%
+                                }
+                            %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Class:</label>
+                        <select class="form-select" id="reportClassFilter">
+                            <option value="">All Classes</option>
+                            <%
+                                try {
+                                    conn = DatabaseConnection.getConnection();
+                                    String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                    pst = conn.prepareStatement(classSQL);
+                                    rs = pst.executeQuery();
+                                    while (rs.next()) {
+                                        String className = rs.getString("class");
+                                        if (className != null && !className.trim().isEmpty()) {
+                            %>
+                            <option value="<%= className %>"><%= className %></option>
+                            <%
+                                        }
+                                    }
+                                    rs.close();
+                                    pst.close();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" onclick="generateReport()">
+                            <i class="fas fa-chart-bar"></i> Generate Report
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5>Monthly Attendance Summary</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label>Month:</label>
-                            <select class="form-select" id="reportMonth">
-                                <option value="1">January</option>
-                                <option value="2">February</option>
-                                <option value="3">March</option>
-                                <option value="4">April</option>
-                                <option value="5">May</option>
-                                <option value="6">June</option>
-                                <option value="7">July</option>
-                                <option value="8">August</option>
-                                <option value="9">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12" selected>December</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Year:</label>
-                            <select class="form-select" id="reportYear">
-                                <option value="2024">2024</option>
-                                <option value="2025" selected>2025</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Class:</label>
-                            <select class="form-select" id="reportClassFilter">
-                                <option value="">All Classes</option>
-                                <%
-                                    try {
-                                        String classSQL = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
-                                        pst = conn.prepareStatement(classSQL);
-                                        rs = pst.executeQuery();
-                                        while (rs.next()) {
-                                            String className = rs.getString("class");
-                                            if (className != null && !className.trim().isEmpty()) {
-                                %>
-                                <option value="<%= className %>"><%= className %></option>
-                                <%
-                                            }
-                                        }
-                                        rs.close();
-                                        pst.close();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                %>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-primary w-100" onclick="generateReport()">
-                                <i class="fas fa-chart-bar"></i> Generate Report
-                            </button>
-                        </div>
+            <!-- Yearly Report Section -->
+            <div id="yearlyReportSection" style="display: none;">
+                <h6 class="mb-3"><i class="fas fa-calendar-year"></i> Yearly Attendance Summary</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Year:</label>
+                        <select class="form-select" id="reportYearYearly">
+                            <%
+                                int currentYear2 = Calendar.getInstance().get(Calendar.YEAR);
+                                for (int i = currentYear2; i >= currentYear2 - 5; i--) {
+                            %>
+                            <option value="<%= i %>" <%= i == currentYear2 ? "selected" : "" %>><%= i %></option>
+                            <%
+                                }
+                            %>
+                        </select>
                     </div>
-                    <div id="reportResults">
-                        <p class="text-center text-muted">Select month, year and class, then click Generate Report</p>
+                    <div class="col-md-4">
+                        <label class="form-label">Class:</label>
+                        <select class="form-select" id="reportClassFilterYearly">
+                            <option value="">All Classes</option>
+                            <%
+                                try {
+                                    String classSQL2 = "SELECT DISTINCT class FROM users WHERE role='student' AND is_active=1 AND class IS NOT NULL ORDER BY class";
+                                    pst = conn.prepareStatement(classSQL2);
+                                    rs = pst.executeQuery();
+                                    while (rs.next()) {
+                                        String className = rs.getString("class");
+                                        if (className != null && !className.trim().isEmpty()) {
+                            %>
+                            <option value="<%= className %>"><%= className %></option>
+                            <%
+                                        }
+                                    }
+                                    rs.close();
+                                    pst.close();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            %>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-success w-100" onclick="generateReport()">
+                            <i class="fas fa-chart-line"></i> Generate Yearly Report
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
+            <!-- Report Results -->
+            <div id="reportResults" class="mt-4">
+                <p class="text-center text-muted">Select filters and click Generate Report</p>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Students Section -->
         <div id="students" class="page-section">
             <div class="header-card">

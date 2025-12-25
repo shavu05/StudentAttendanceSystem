@@ -700,10 +700,21 @@ function downloadFile(content, filename, mimeType) {
 }
 
 // ============================================
-// GENERATE REPORT
+// GENERATE REPORT - ENHANCED VERSION
 // ============================================
 
 function generateReport() {
+    const reportType = document.querySelector('input[name="reportType"]:checked').value;
+    
+    if (reportType === 'monthly') {
+        generateMonthlyReport();
+    } else {
+        generateYearlyReport();
+    }
+}
+
+// Generate Monthly Report
+function generateMonthlyReport() {
     const month = document.getElementById('reportMonth').value;
     const year = document.getElementById('reportYear').value;
     const classFilter = document.getElementById('reportClassFilter').value;
@@ -729,34 +740,10 @@ function generateReport() {
             }
             
             if (data.success && data.report && data.report.length > 0) {
-                let html = '<div class="table-responsive">';
-                html += '<table class="table table-bordered table-striped table-hover">';
-                html += '<thead class="table-dark"><tr>';
-                html += '<th>Roll No</th><th>Student Name</th><th>Class</th>';
-                html += '<th>Present Days</th><th>Absent Days</th><th>Total Days</th><th>Attendance %</th>';
-                html += '</tr></thead><tbody>';
-                
-                data.report.forEach(student => {
-                    const percentage = parseFloat(student.percentage);
-                    let badgeClass = percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger';
-                    
-                    html += `<tr>
-                        <td>${student.rollNo}</td>
-                        <td>${student.fullName}</td>
-                        <td>${student.className}</td>
-                        <td><span class="badge bg-success">${student.presentDays}</span></td>
-                        <td><span class="badge bg-danger">${student.absentDays}</span></td>
-                        <td><strong>${student.totalDays}</strong></td>
-                        <td><span class="badge ${badgeClass}">${student.percentage}%</span></td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table></div>';
-                document.getElementById('reportResults').innerHTML = html;
-                
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Report Generated', timer: 2000, showConfirmButton: false });
+                displayMonthlyReport(data.report, month, year);
             } else {
-                document.getElementById('reportResults').innerHTML = '<div class="alert alert-warning">No data available</div>';
+                document.getElementById('reportResults').innerHTML = 
+                    '<div class="alert alert-warning">No data available for selected month</div>';
             }
         },
         error: function() {
@@ -766,6 +753,288 @@ function generateReport() {
     });
 }
 
+// Generate Yearly Report
+function generateYearlyReport() {
+    const year = document.getElementById('reportYearYearly').value;
+    const classFilter = document.getElementById('reportClassFilterYearly').value;
+    
+    document.getElementById('loading').style.display = 'flex';
+    
+    $.ajax({
+        url: 'AttendanceServlet',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            action: 'generateYearlyReport',
+            year: year,
+            class: classFilter
+        },
+        success: function(response) {
+            document.getElementById('loading').style.display = 'none';
+            
+            let data = response;
+            if (typeof response === 'string') {
+                try { data = JSON.parse(response); } catch (e) { return; }
+            }
+            
+            if (data.success && data.report && data.report.length > 0) {
+                displayYearlyReport(data.report, year);
+            } else {
+                document.getElementById('reportResults').innerHTML = 
+                    '<div class="alert alert-warning">No data available for selected year</div>';
+            }
+        },
+        error: function() {
+            document.getElementById('loading').style.display = 'none';
+            Swal.fire('Error', 'Failed to generate yearly report', 'error');
+        }
+    });
+}
+
+// Display Monthly Report
+function displayMonthlyReport(report, month, year) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    let html = '<div class="table-responsive">';
+    html += `<h5 class="mb-3">Monthly Report - ${monthNames[parseInt(month) - 1]} ${year}</h5>`;
+    html += '<table class="table table-bordered table-striped table-hover">';
+    html += '<thead class="table-dark"><tr>';
+    html += '<th>Roll No</th><th>Student Name</th><th>Class</th>';
+    html += '<th>Present Days</th><th>Absent Days</th><th>Total Days</th><th>Attendance %</th>';
+    html += '</tr></thead><tbody>';
+    
+    report.forEach(student => {
+        const percentage = parseFloat(student.percentage);
+        let badgeClass = percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger';
+        
+        html += `<tr>
+            <td>${student.rollNo}</td>
+            <td>${student.fullName}</td>
+            <td>${student.className}</td>
+            <td><span class="badge bg-success">${student.presentDays}</span></td>
+            <td><span class="badge bg-danger">${student.absentDays}</span></td>
+            <td><strong>${student.totalDays}</strong></td>
+            <td><span class="badge ${badgeClass}">${student.percentage}%</span></td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table></div>';
+    document.getElementById('reportResults').innerHTML = html;
+    
+    Swal.fire({ 
+        toast: true, 
+        position: 'top-end', 
+        icon: 'success', 
+        title: 'Report Generated', 
+        timer: 2000, 
+        showConfirmButton: false 
+    });
+}
+
+// Display Yearly Report
+function displayYearlyReport(report, year) {
+    let html = '<div class="table-responsive">';
+    html += `<h5 class="mb-3">Yearly Report - ${year}</h5>`;
+    html += '<table class="table table-bordered table-striped table-hover">';
+    html += '<thead class="table-dark"><tr>';
+    html += '<th>Roll No</th><th>Student Name</th><th>Class</th>';
+    html += '<th>Present Days</th><th>Absent Days</th><th>Total Days</th><th>Attendance %</th>';
+    html += '</tr></thead><tbody>';
+    
+    report.forEach(student => {
+        const percentage = parseFloat(student.percentage);
+        let badgeClass = percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger';
+        
+        html += `<tr>
+            <td>${student.rollNo}</td>
+            <td>${student.fullName}</td>
+            <td>${student.className}</td>
+            <td><span class="badge bg-success">${student.presentDays}</span></td>
+            <td><span class="badge bg-danger">${student.absentDays}</span></td>
+            <td><strong>${student.totalDays}</strong></td>
+            <td><span class="badge ${badgeClass}">${student.percentage}%</span></td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table></div>';
+    document.getElementById('reportResults').innerHTML = html;
+    
+    Swal.fire({ 
+        toast: true, 
+        position: 'top-end', 
+        icon: 'success', 
+        title: 'Yearly Report Generated', 
+        timer: 2000, 
+        showConfirmButton: false 
+    });
+}
+
+// ============================================
+// EXPORT FUNCTIONS - ENHANCED
+// ============================================
+
+function exportToExcel() {
+    const reportType = document.querySelector('input[name="reportType"]:checked').value;
+    
+    if (reportType === 'monthly') {
+        exportMonthlyReport();
+    } else {
+        exportYearlyReport();
+    }
+}
+
+function exportMonthlyReport() {
+    const month = document.getElementById('reportMonth').value;
+    const year = document.getElementById('reportYear').value;
+    const classFilter = document.getElementById('reportClassFilter').value;
+    
+    const reportTable = document.querySelector('#reportResults table');
+    if (!reportTable) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Report Found',
+            text: 'Please generate the report first'
+        });
+        return;
+    }
+    
+    document.getElementById('loading').style.display = 'flex';
+    
+    $.ajax({
+        url: 'AttendanceServlet',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            action: 'generateReport',
+            month: month,
+            year: year,
+            class: classFilter
+        },
+        success: function(response) {
+            document.getElementById('loading').style.display = 'none';
+            
+            let data = response;
+            if (typeof response === 'string') {
+                try { data = JSON.parse(response); } catch (e) { return; }
+            }
+            
+            if (data.success && data.report && data.report.length > 0) {
+                let csv = '\uFEFF';
+                csv += 'Roll No,Student Name,Class,Present Days,Absent Days,Total Days,Attendance Percentage\n';
+                
+                data.report.forEach(student => {
+                    csv += `${student.rollNo},`;
+                    csv += `"${student.fullName}",`;
+                    csv += `"${student.className}",`;
+                    csv += `${student.presentDays},`;
+                    csv += `${student.absentDays},`;
+                    csv += `${student.totalDays},`;
+                    csv += `${student.percentage}%\n`;
+                });
+                
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const filename = `Monthly_Attendance_Report_${monthNames[parseInt(month) - 1]}_${year}.csv`;
+                
+                downloadFile(csv, filename, 'text/csv;charset=utf-8;');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful',
+                    text: `${data.report.length} students exported`,
+                    timer: 2000
+                });
+            }
+        },
+        error: function() {
+            document.getElementById('loading').style.display = 'none';
+            Swal.fire('Error', 'Failed to export', 'error');
+        }
+    });
+}
+
+function exportYearlyReport() {
+    const year = document.getElementById('reportYearYearly').value;
+    const classFilter = document.getElementById('reportClassFilterYearly').value;
+    
+    const reportTable = document.querySelector('#reportResults table');
+    if (!reportTable) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Report Found',
+            text: 'Please generate the yearly report first'
+        });
+        return;
+    }
+    
+    document.getElementById('loading').style.display = 'flex';
+    
+    $.ajax({
+        url: 'AttendanceServlet',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            action: 'generateYearlyReport',
+            year: year,
+            class: classFilter
+        },
+        success: function(response) {
+            document.getElementById('loading').style.display = 'none';
+            
+            let data = response;
+            if (typeof response === 'string') {
+                try { data = JSON.parse(response); } catch (e) { return; }
+            }
+            
+            if (data.success && data.report && data.report.length > 0) {
+                let csv = '\uFEFF';
+                csv += 'Roll No,Student Name,Class,Present Days,Absent Days,Total Days,Attendance Percentage\n';
+                
+                data.report.forEach(student => {
+                    csv += `${student.rollNo},`;
+                    csv += `"${student.fullName}",`;
+                    csv += `"${student.className}",`;
+                    csv += `${student.presentDays},`;
+                    csv += `${student.absentDays},`;
+                    csv += `${student.totalDays},`;
+                    csv += `${student.percentage}%\n`;
+                });
+                
+                const filename = `Yearly_Attendance_Report_${year}.csv`;
+                
+                downloadFile(csv, filename, 'text/csv;charset=utf-8;');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful',
+                    text: `${data.report.length} students exported`,
+                    timer: 2000
+                });
+            }
+        },
+        error: function() {
+            document.getElementById('loading').style.display = 'none';
+            Swal.fire('Error', 'Failed to export', 'error');
+        }
+    });
+}
+
+// Toggle report type visibility
+function toggleReportType() {
+    const reportType = document.querySelector('input[name="reportType"]:checked').value;
+    
+    if (reportType === 'monthly') {
+        document.getElementById('monthlyReportSection').style.display = 'block';
+        document.getElementById('yearlyReportSection').style.display = 'none';
+    } else {
+        document.getElementById('monthlyReportSection').style.display = 'none';
+        document.getElementById('yearlyReportSection').style.display = 'block';
+    }
+    
+    // Clear previous results
+    document.getElementById('reportResults').innerHTML = 
+        '<p class="text-center text-muted">Select filters and click Generate Report</p>';
+}
 // ============================================
 // DASHBOARD CHART
 // ============================================

@@ -71,6 +71,10 @@ public class AttendanceServlet extends HttpServlet {
                     generateReport(request, out);
                     break;
 
+                case "generateYearlyReport":
+                    generateYearlyReport(request, out);
+                    break;
+
                 case "getChartData":
                     getChartData(out);
                     break;
@@ -185,7 +189,7 @@ public class AttendanceServlet extends HttpServlet {
     }
 
     // ===============================
-    // GENERATE REPORT
+    // GENERATE REPORT (MONTHLY)
     // ===============================
     private void generateReport(HttpServletRequest request, PrintWriter out) throws Exception {
 
@@ -217,6 +221,70 @@ public class AttendanceServlet extends HttpServlet {
 
         if (classFilter != null && !classFilter.isEmpty()) {
             pst.setString(3, classFilter);
+        }
+
+        ResultSet rs = pst.executeQuery();
+
+        JSONArray report = new JSONArray();
+
+        while (rs.next()) {
+            JSONObject obj = new JSONObject();
+            int total = rs.getInt("total_days");
+            int present = rs.getInt("present_days");
+
+            obj.put("rollNo", rs.getString("roll_no"));
+            obj.put("fullName", rs.getString("full_name"));
+            obj.put("className", rs.getString("class"));
+            obj.put("presentDays", present);
+            obj.put("absentDays", rs.getInt("absent_days"));
+            obj.put("totalDays", total);
+            obj.put("percentage", total > 0 ? String.format("%.1f", (present * 100.0 / total)) : "0.0");
+
+            report.put(obj);
+        }
+
+        JSONObject result = new JSONObject();
+        result.put("success", true);
+        result.put("report", report);
+
+        rs.close();
+        pst.close();
+        conn.close();
+
+        out.print(result.toString());
+    }
+
+    // ===============================
+    // GENERATE YEARLY REPORT
+    // ===============================
+    private void generateYearlyReport(HttpServletRequest request, PrintWriter out) throws Exception {
+
+        String year = request.getParameter("year");
+        String classFilter = request.getParameter("class");
+
+        Connection conn = DatabaseConnection.getConnection();
+
+        StringBuilder sql = new StringBuilder(
+            "SELECT u.id, u.roll_no, u.full_name, u.class, "
+          + "SUM(a.status='present') AS present_days, "
+          + "SUM(a.status='absent') AS absent_days, "
+          + "COUNT(a.id) AS total_days "
+          + "FROM users u LEFT JOIN attendance a "
+          + "ON u.id = a.student_id AND YEAR(a.attendance_date)=? "
+          + "WHERE u.role='student' AND u.is_active=1 "
+        );
+
+        if (classFilter != null && !classFilter.isEmpty()) {
+            sql.append("AND u.class = ? ");
+        }
+
+        sql.append("GROUP BY u.id ORDER BY u.roll_no");
+
+        PreparedStatement pst = conn.prepareStatement(sql.toString());
+        pst.setInt(1, Integer.parseInt(year));
+
+        if (classFilter != null && !classFilter.isEmpty()) {
+            pst.setString(2, classFilter);
         }
 
         ResultSet rs = pst.executeQuery();
