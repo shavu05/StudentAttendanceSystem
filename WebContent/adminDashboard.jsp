@@ -205,16 +205,7 @@
                         <span>Manage Classes</span>
                         <small class="text-muted">Add/View/Update Classes</small>
                     </div>
-                    <div class="action-btn reports" onclick="showSection('reports')">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Generate Reports</span>
-                        <small class="text-muted">Attendance & Analytics</small>
-                    </div>
-                    <div class="action-btn settings" onclick="showSection('settings')">
-                        <i class="fas fa-cog"></i>
-                        <span>System Settings</span>
-                        <small class="text-muted">Configure Preferences</small>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -891,8 +882,15 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control" name="phone">
+				                                 <label class="form-label">
+				   								 Phone Number <span class="required-star">*</span>
+												</label>
+
+                                    <input type="tel" class="form-control" name="phone"
+							       maxlength="10"
+							       placeholder="Enter 10-digit mobile number"
+							       oninput="restrictPhoneInput(this)">
+
                                 </div>
                                 
                                 <div class="mb-3">
@@ -1047,8 +1045,15 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control" id="editPhone" name="phone">
+                                   <label class="form-label">
+   									 Phone Number <span class="required-star">*</span>
+									</label>
+
+                                    <input type="tel" class="form-control" id="editPhone" name="phone"
+									       maxlength="10"
+									       placeholder="Enter 10-digit mobile number"
+									       oninput="restrictPhoneInput(this)">
+
                                 </div>
                                 
                                 <div class="mb-3">

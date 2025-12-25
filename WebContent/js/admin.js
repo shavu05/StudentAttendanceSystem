@@ -1,4 +1,3 @@
-
 var currentUserId = null;
 var tableState = {
  'admin': { currentPage: 1, pageSize: 10, filteredRows: [], totalRows: 0, searchTerm: '', statusFilter: 'all', sortBy: 'id' },
@@ -11,12 +10,24 @@ document.addEventListener('DOMContentLoaded', function() {
  initializeAll();
 });
 
+// ============================================
+// INITIALIZE ALL - FIXED TO RESTORE SECTION
+// ============================================
 function initializeAll() {
  initializeTable('admin');
  initializeTable('teacher');
  initializeTable('student');
  initializeTable('all-users');
- showSection('dashboard');
+ 
+ // RESTORE PREVIOUS SECTION IF EXISTS
+ var savedSection = sessionStorage.getItem('activeSection');
+ if (savedSection) {
+     sessionStorage.removeItem('activeSection'); // Clear it after use
+     showSection(savedSection);
+ } else {
+     showSection('dashboard');
+ }
+ 
  setupFormHandlers();
  setupMobileMenu();
  adjustNavigationForMobile();
@@ -73,6 +84,39 @@ function initializeTable(tableType) {
  filterTable(tableType);
 }
 
+// ============================================
+// GET CURRENTLY ACTIVE SECTION
+// ============================================
+function getCurrentActiveSection() {
+ // Check which section is currently active
+ var activeLink = document.querySelector('.nav-link.active');
+ if (activeLink) {
+     var section = activeLink.getAttribute('data-section');
+     if (section) return section;
+ }
+ 
+ // Fallback: check which table container is visible
+ var activeContainer = document.querySelector('.table-container.active');
+ if (activeContainer) {
+     var id = activeContainer.id;
+     if (id === 'admin-management') return 'admin';
+     if (id === 'teacher-management') return 'teacher';
+     if (id === 'student-management') return 'student';
+     if (id === 'all-users') return 'all-users';
+ }
+ 
+ // Check if dashboard is visible
+ var dashboard = document.getElementById('dashboard-content');
+ if (dashboard && dashboard.style.display !== 'none') {
+     return 'dashboard';
+ }
+ 
+ return 'dashboard'; // default fallback
+}
+
+// ============================================
+// ADD USER - FIXED TO STAY ON CURRENT PAGE
+// ============================================
 function addUser() {
  var form = document.getElementById("addUserForm");
  var formData = new FormData(form);
@@ -80,6 +124,33 @@ function addUser() {
  var username = formData.get('username');
  var password = formData.get('password');
  var email = formData.get('email');
+ var phone = formData.get('phone');
+ var phone = formData.get('phone');
+
+ if (phone) {
+     if (!isValidMobileNumber(phone)) {
+         Swal.fire("Invalid Mobile Number", "Mobile number must be exactly 10 digits", "warning");
+         return;
+     }
+
+     if (isDuplicateMobile(phone)) {
+         Swal.fire("Duplicate Mobile Number", "This mobile number already exists", "error");
+         return;
+     }
+ }
+
+ if (phone) {
+     if (!isValidMobileNumber(phone)) {
+         Swal.fire("Invalid Mobile Number", "Mobile number must be 10 digits", "warning");
+         return;
+     }
+
+     if (isDuplicateMobile(phone)) {
+         Swal.fire("Duplicate Mobile Number", "This mobile number already exists", "error");
+         return;
+     }
+ }
+
  var fullName = formData.get('fullName');
  var role = formData.get('role');
  
@@ -99,6 +170,9 @@ function addUser() {
  var data = new URLSearchParams(formData);
  data.append("action", "add");
  
+ // SAVE CURRENT SECTION BEFORE RELOAD
+ var currentSection = getCurrentActiveSection();
+ 
  Swal.fire({
      title: 'Adding User...',
      allowOutsideClick: false,
@@ -114,8 +188,21 @@ function addUser() {
  .then(function(result) {
      Swal.close();
      if (result.success) {
-         Swal.fire({ icon: "success", title: "Success!", text: result.message, timer: 2000 })
-             .then(function() { location.reload(); });
+         Swal.fire({ 
+             icon: "success", 
+             title: "Success!", 
+             text: result.message, 
+             timer: 2000,
+             showConfirmButton: false
+         }).then(function() { 
+             // Close the modal
+             var modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+             if (modal) modal.hide();
+             
+             // Save section and reload
+             sessionStorage.setItem('activeSection', currentSection);
+             location.reload(); 
+         });
      } else {
          Swal.fire("Error", result.message, "error");
      }
@@ -214,15 +301,34 @@ function editUserFromView() {
  setTimeout(function() { editUser(currentUserId); }, 300);
 }
 
+// ============================================
+// UPDATE USER - FIXED TO STAY ON CURRENT PAGE
+// ============================================
 function updateUser() {
  var form = document.getElementById("editUserForm");
  var formData = new FormData(form);
- 
+
+
+ var phone = formData.get('phone');
+ var userId = formData.get('id');
+
+ if (phone) {
+     if (!isValidMobileNumber(phone)) {
+         Swal.fire("Invalid Mobile Number", "Mobile number must be exactly 10 digits", "warning");
+         return;
+     }
+
+     if (isDuplicateMobile(phone, userId)) {
+         Swal.fire("Duplicate Mobile Number", "This mobile number already exists", "error");
+         return;
+     }
+ }
+
  if (!formData.get('username') || !formData.get('email') || !formData.get('fullName')) {
      Swal.fire("Validation Error", "Please fill all required fields", "warning");
      return;
  }
- //paswd
+ 
  var password = formData.get('password');
  if (password && password.length < 6) {
      Swal.fire("Validation Error", "Password must be at least 6 characters", "warning");
@@ -235,6 +341,9 @@ function updateUser() {
  var data = new URLSearchParams(formData);
  data.append("action", "update");
  
+ // SAVE CURRENT SECTION BEFORE RELOAD
+ var currentSection = getCurrentActiveSection();
+ 
  Swal.fire({ title: 'Updating User...', allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
 
  fetch("UserServlet", {
@@ -246,8 +355,21 @@ function updateUser() {
  .then(function(result) {
      Swal.close();
      if (result.success) {
-         Swal.fire({ icon: "success", title: "Updated!", text: result.message, timer: 2000 })
-             .then(function() { location.reload(); });
+         Swal.fire({ 
+             icon: "success", 
+             title: "Updated!", 
+             text: result.message, 
+             timer: 2000,
+             showConfirmButton: false
+         }).then(function() { 
+             // Close the modal
+             var modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+             if (modal) modal.hide();
+             
+             // Save section and reload
+             sessionStorage.setItem('activeSection', currentSection);
+             location.reload(); 
+         });
      } else {
          Swal.fire("Error", result.message, "error");
      }
@@ -259,7 +381,12 @@ function updateUser() {
  });
 }
 
+// ============================================
+// DELETE USER - FIXED TO STAY ON CURRENT PAGE
+// ============================================
 function deleteUser(id) {
+ var currentSection = getCurrentActiveSection(); // Save current section
+ 
  Swal.fire({
      title: "Delete User?",
      text: "This action cannot be undone!",
@@ -281,8 +408,17 @@ function deleteUser(id) {
      .then(function(result) {
          Swal.close();
          if (result.success) {
-             Swal.fire({ icon: "success", title: "Deleted!", text: result.message, timer: 2000 })
-                 .then(function() { location.reload(); });
+             Swal.fire({ 
+                 icon: "success", 
+                 title: "Deleted!", 
+                 text: result.message, 
+                 timer: 2000,
+                 showConfirmButton: false
+             }).then(function() { 
+                 // Save section and reload
+                 sessionStorage.setItem('activeSection', currentSection);
+                 location.reload(); 
+             });
          } else {
              Swal.fire("Error", result.message, "error");
          }
@@ -628,5 +764,60 @@ function adjustNavigationForMobile() {
      }
  }
 }
+// ============================================
+// MOBILE NUMBER VALIDATION (10 DIGITS + NO DUPLICATE)
+// ============================================
+
+function isValidMobileNumber(mobile) {
+    return /^[6-9]\d{9}$/.test(mobile); // Indian 10-digit format
+}
+
+function isDuplicateMobile(mobile, excludeUserId = null) {
+    let rows = document.querySelectorAll('tr[data-phone]');
+    for (let i = 0; i < rows.length; i++) {
+        let rowPhone = rows[i].getAttribute('data-phone');
+        let rowId = rows[i].getAttribute('data-id');
+
+        if (rowPhone === mobile) {
+            if (excludeUserId && rowId == excludeUserId) continue;
+            return true;
+        }
+    }
+    return false;
+}
+// ============================================
+// PHONE NUMBER INPUT CONTROL (ONLY 10 DIGITS)
+// ============================================
+function restrictPhoneInput(input) {
+    // Allow digits only
+    input.value = input.value.replace(/[^0-9]/g, '');
+
+    // Restrict length to 10
+    if (input.value.length > 10) {
+        input.value = input.value.slice(0, 10);
+    }
+}
+
+// ============================================
+// MOBILE NUMBER VALIDATION (10 DIGITS + UNIQUE)
+// ============================================
+function isValidMobileNumber(mobile) {
+    return /^[6-9]\d{9}$/.test(mobile);
+}
+
+function isDuplicateMobile(mobile, excludeUserId = null) {
+    const rows = document.querySelectorAll('tr[data-phone]');
+    for (let row of rows) {
+        const rowPhone = row.getAttribute('data-phone');
+        const rowId = row.getAttribute('data-id');
+
+        if (rowPhone === mobile) {
+            if (excludeUserId && rowId == excludeUserId) continue;
+            return true;
+        }
+    }
+    return false;
+}
+
 
 console.log('EduTrack Pro Admin Dashboard v1.0.0 - Ready');

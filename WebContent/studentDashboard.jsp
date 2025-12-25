@@ -1,10 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.util.Calendar" %>
 <%@ page import="com.attendance.util.DatabaseConnection" %>
 <%
-    // ============================================
-    // SESSION VALIDATION - ONLY FOR STUDENT
-    // ============================================
+    // SESSION VALIDATION
     if (session == null || session.getAttribute("user") == null) {
         response.sendRedirect("login.jsp");
         return;
@@ -12,11 +11,10 @@
     
     String role = (String) session.getAttribute("role");
     if (!"student".equals(role)) {
-        response.sendRedirect("login.jsp?error=Access denied. Students only.");
+        response.sendRedirect("login.jsp?error=Access denied");
         return;
     }
     
-    // Get logged-in student's ID
     Integer studentId = (Integer) session.getAttribute("userId");
     String studentName = (String) session.getAttribute("fullName");
     
@@ -25,26 +23,11 @@
         return;
     }
     
-    // ============================================
-    // FETCH STUDENT'S PERSONAL DATA ONLY
-    // ============================================
-    String rollNo = "N/A";
-    String className = "N/A";
-    String email = "N/A";
-    String phone = "N/A";
-    String department = "N/A";
-    String username = "N/A";
-    
-    int totalDays = 0;
-    int presentDays = 0;
-    int absentDays = 0;
-    double attendancePercentage = 0.0;
-    
-    // Monthly stats
-    int monthlyTotalDays = 0;
-    int monthlyPresentDays = 0;
-    int monthlyAbsentDays = 0;
-    double monthlyPercentage = 0.0;
+    // FETCH STUDENT DATA
+    String rollNo = "N/A", className = "N/A", email = "N/A", phone = "N/A", department = "N/A", username = "N/A";
+    int totalDays = 0, presentDays = 0, absentDays = 0;
+    int monthlyTotalDays = 0, monthlyPresentDays = 0, monthlyAbsentDays = 0;
+    double attendancePercentage = 0.0, monthlyPercentage = 0.0;
     
     Connection conn = null;
     PreparedStatement pst = null;
@@ -53,11 +36,8 @@
     try {
         conn = DatabaseConnection.getConnection();
         
-        // ============================================
-        // GET STUDENT PERSONAL DETAILS
-        // ============================================
-        String sqlUser = "SELECT username, roll_no, class, email, phone, department, full_name " +
-                        "FROM users WHERE id = ? AND role = 'student'";
+        // Get student details
+        String sqlUser = "SELECT username, roll_no, class, email, phone, department, full_name FROM users WHERE id = ? AND role = 'student'";
         pst = conn.prepareStatement(sqlUser);
         pst.setInt(1, studentId);
         rs = pst.executeQuery();
@@ -74,15 +54,8 @@
         rs.close();
         pst.close();
         
-        // ============================================
-        // GET OVERALL ATTENDANCE STATISTICS
-        // ============================================
-        String sqlStats = "SELECT " +
-                         "COUNT(*) as total_days, " +
-                         "SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present_days, " +
-                         "SUM(CASE WHEN status='absent' THEN 1 ELSE 0 END) as absent_days " +
-                         "FROM attendance WHERE student_id = ?";
-        
+        // Overall statistics
+        String sqlStats = "SELECT COUNT(*) as total_days, SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present_days, SUM(CASE WHEN status='absent' THEN 1 ELSE 0 END) as absent_days FROM attendance WHERE student_id = ?";
         pst = conn.prepareStatement(sqlStats);
         pst.setInt(1, studentId);
         rs = pst.executeQuery();
@@ -91,7 +64,6 @@
             totalDays = rs.getInt("total_days");
             presentDays = rs.getInt("present_days");
             absentDays = rs.getInt("absent_days");
-            
             if (totalDays > 0) {
                 attendancePercentage = ((double) presentDays / totalDays) * 100;
             }
@@ -99,18 +71,8 @@
         rs.close();
         pst.close();
         
-        // ============================================
-        // GET MONTHLY ATTENDANCE STATISTICS
-        // ============================================
-        String sqlMonthly = "SELECT " +
-                           "COUNT(*) as total_days, " +
-                           "SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present_days, " +
-                           "SUM(CASE WHEN status='absent' THEN 1 ELSE 0 END) as absent_days " +
-                           "FROM attendance " +
-                           "WHERE student_id = ? " +
-                           "AND MONTH(attendance_date) = MONTH(CURDATE()) " +
-                           "AND YEAR(attendance_date) = YEAR(CURDATE())";
-        
+        // Monthly statistics
+        String sqlMonthly = "SELECT COUNT(*) as total_days, SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) as present_days, SUM(CASE WHEN status='absent' THEN 1 ELSE 0 END) as absent_days FROM attendance WHERE student_id = ? AND MONTH(attendance_date) = MONTH(CURDATE()) AND YEAR(attendance_date) = YEAR(CURDATE())";
         pst = conn.prepareStatement(sqlMonthly);
         pst.setInt(1, studentId);
         rs = pst.executeQuery();
@@ -119,19 +81,15 @@
             monthlyTotalDays = rs.getInt("total_days");
             monthlyPresentDays = rs.getInt("present_days");
             monthlyAbsentDays = rs.getInt("absent_days");
-            
             if (monthlyTotalDays > 0) {
                 monthlyPercentage = ((double) monthlyPresentDays / monthlyTotalDays) * 100;
             }
         }
-        
     } catch (Exception e) {
         e.printStackTrace();
-        out.println("<script>alert('Database Error: " + e.getMessage() + "');</script>");
     } finally {
         if (rs != null) try { rs.close(); } catch (SQLException e) { }
         if (pst != null) try { pst.close(); } catch (SQLException e) { }
-        // Don't close connection yet - we need it for attendance records below
     }
 %>
 <!DOCTYPE html>
@@ -141,16 +99,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dashboard - <%= studentName %></title>
     
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
- <link rel="stylesheet" href="css/student.css">
+    <link rel="stylesheet" href="css/student.css">
 </head>
 <body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
@@ -159,14 +118,9 @@
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
                 <span class="d-none d-sm-inline">Welcome, <strong><%= studentName %></strong></span>
-                
-                
-             <button type="button" class="btn btn-logout" onclick="confirmLogout()" >
-    <i class="fas fa-sign-out-alt"></i> Logout
-</button>
-
-                
-                
+                <button type="button" class="btn btn-logout" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </div>
     </nav>
@@ -227,17 +181,23 @@
             <% if (attendancePercentage >= 75) { %>
                 <div class="alert attendance-alert alert-success">
                     <i class="fas fa-check-circle"></i>
-                    <strong>Excellent!</strong> Your attendance is above 75%. Keep up the good work!
+                    <div>
+                        <strong>Excellent!</strong> Your attendance is above 75%. Keep up the good work!
+                    </div>
                 </div>
             <% } else if (attendancePercentage >= 60) { %>
                 <div class="alert attendance-alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Warning!</strong> Your attendance is below 75%. Please improve your attendance.
+                    <div>
+                        <strong>Warning!</strong> Your attendance is below 75%. Please improve your attendance.
+                    </div>
                 </div>
             <% } else { %>
                 <div class="alert attendance-alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i>
-                    <strong>Critical!</strong> Your attendance is critically low. Immediate action required!
+                    <div>
+                        <strong>Critical!</strong> Your attendance is critically low. Immediate action required!
+                    </div>
                 </div>
             <% } %>
         <% } %>
@@ -292,6 +252,106 @@
             </div>
         </div>
 
+        <!-- NEW: My Reports Section -->
+        <div class="reports-section">
+            <div class="reports-header">
+                <h4><i class="fas fa-chart-bar"></i> My Attendance Reports</h4>
+                <button class="btn btn-export" onclick="exportReport()">
+                    <i class="fas fa-file-excel"></i> Export Report
+                </button>
+            </div>
+            
+            <!-- Report Type Selection -->
+            <div class="mb-4">
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="reportType" id="yearlyReportType" value="yearly" checked onchange="toggleReportType()">
+                    <label class="btn btn-outline-primary" for="yearlyReportType">
+                        <i class="fas fa-calendar"></i> Yearly Report
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="reportType" id="monthlyReportType" value="monthly" onchange="toggleReportType()">
+                    <label class="btn btn-outline-primary" for="monthlyReportType">
+                        <i class="fas fa-calendar-alt"></i> Monthly Report
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Yearly Filters -->
+            <div class="reports-filters" id="yearlyFilters">
+                <div class="filter-group">
+                    <label for="reportYear">
+                        <i class="fas fa-calendar-year"></i> Select Year
+                    </label>
+                    <select class="form-select" id="reportYear">
+                        <%
+                            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                            for (int i = currentYear; i >= currentYear - 5; i--) {
+                        %>
+                        <option value="<%= i %>" <%= i == currentYear ? "selected" : "" %>><%= i %></option>
+                        <%
+                            }
+                        %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-generate" onclick="generateYearlyReport()">
+                        <i class="fas fa-chart-line"></i> Generate Report
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Monthly Filters -->
+            <div class="reports-filters" id="monthlyFilters" style="display: none;">
+                <div class="filter-group">
+                    <label for="reportMonth">
+                        <i class="fas fa-calendar-alt"></i> Month
+                    </label>
+                    <select class="form-select" id="reportMonth">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12" selected>December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="reportMonthYear">Year</label>
+                    <select class="form-select" id="reportMonthYear">
+                        <%
+                            for (int i = currentYear; i >= currentYear - 5; i--) {
+                        %>
+                        <option value="<%= i %>" <%= i == currentYear ? "selected" : "" %>><%= i %></option>
+                        <%
+                            }
+                        %>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-generate" onclick="generateMonthlyReport()">
+                        <i class="fas fa-chart-bar"></i> Generate Report
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Report Results -->
+            <div id="reportResults" class="mt-4">
+                <div class="empty-state">
+                    <i class="fas fa-chart-bar"></i>
+                    <h5>Select Filters and Generate Report</h5>
+                    <p>Choose the appropriate filters and click "Generate Report"</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Recent Attendance Records -->
         <div class="table-card">
             <div class="table-header">
@@ -317,11 +377,7 @@
                                 conn = DatabaseConnection.getConnection();
                             }
                             
-                            String sqlRecords = "SELECT attendance_date, status, marked_at, remarks " +
-                                              "FROM attendance " +
-                                              "WHERE student_id = ? " +
-                                              "ORDER BY attendance_date DESC " +
-                                              "LIMIT 30";
+                            String sqlRecords = "SELECT attendance_date, status, marked_at, remarks FROM attendance WHERE student_id = ? ORDER BY attendance_date DESC LIMIT 30";
                             pst = conn.prepareStatement(sqlRecords);
                             pst.setInt(1, studentId);
                             rs = pst.executeQuery();
@@ -356,7 +412,6 @@
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            out.println("<tr><td colspan='4' class='text-center text-danger'>Error loading records: " + e.getMessage() + "</td></tr>");
                         } finally {
                             if (rs != null) try { rs.close(); } catch (SQLException e) { }
                             if (pst != null) try { pst.close(); } catch (SQLException e) { }
@@ -379,26 +434,21 @@
                 </table>
             </div>
         </div>
-        <!-- Footer Credit -->
-<!-- Professional Footer Credit -->
-<div class="credit-badge">
-    <i class="fas fa-user-graduate"></i>
-    <span>Created by <strong>Shravani Sanika</strong></span>
-</div>
 
+        <!-- Footer Credit -->
+        <div class="credit-badge">
+            <i class="fas fa-user-graduate"></i>
+            <span>Created by <strong>Shravani & Sanika</strong></span>
+        </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Values coming from server (JSP)
-    const STUDENT_ID   = <%= studentId %>;
-    const TOTAL_DAYS   = <%= totalDays %>;
-    const PRESENT_DAYS = <%= presentDays %>;
-    const ABSENT_DAYS  = <%= absentDays %>;
-</script>
-
-<script src="js/student.js"></script>
-
+    <script>
+        const STUDENT_ID   = <%= studentId %>;
+        const TOTAL_DAYS   = <%= totalDays %>;
+        const PRESENT_DAYS = <%= presentDays %>;
+        const ABSENT_DAYS  = <%= absentDays %>;
+    </script>
+    <script src="js/student.js"></script>
 </body>
 </html>
