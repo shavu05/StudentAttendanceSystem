@@ -1,3 +1,4 @@
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,20 +37,18 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="index.jsp">Home</a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#features">Features</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
-                    </li>
+                   
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">Contact</a>
                     </li>
                     <li class="nav-item ms-2">
                         <a href="login.jsp" class="btn btn-outline-primary">Login</a>
-                    </li>
-                    <li class="nav-item ms-2">
-                        <a href="login.jsp" class="btn btn-primary">Get Started</a>
                     </li>
                 </ul>
             </div>
@@ -65,73 +64,66 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 hero-content">
                     <h1 class="hero-title animate__animated animate__fadeInUp">
-                        Revolutionize Student Attendance Management
+                        Student Attendance Management System
                     </h1>
                     <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">
-                        Advanced analytics, real-time tracking, and automated reporting for educational institutions. 
-                        Streamline your attendance processes with our intelligent platform.
+                       A comprehensive digital platform for educational institutions to track, analyze, and manage student attendance with precision, security, and ease.
                     </p>
                     <div class="mt-4 animate__animated animate__fadeInUp animate__delay-2s">
                         <a href="login.jsp" class="btn btn-primary btn-lg me-3">
-                            <i class="fas fa-rocket me-2"></i>Get Started Now
-                        </a>
-                        <a href="#features" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-play-circle me-2"></i>Watch Demo
+                            <i class="fas fa-rocket me-2"></i>Access System
                         </a>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <!-- Hero image would go here -->
-                </div>
+
             </div>
         </div>
     </section>
     
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="stat-card fade-in-up">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-number">15,842+</div>
-                        <div class="stat-label">Active Students</div>
-                    </div>
+    <!-- About Section -->   
+     <section id="about" class="about-section">        
+     <div class="container">            
+     <h2 class="section-title">About EduTrack Pro</h2>            
+     <div class="row align-items-center">                
+     <div class="col-lg-6">                    
+     <p class="about-text">                       
+      <strong>EduTrack Pro</strong> is a smart and reliable Student Attendance Management System designed to help educational institutions track, analyze, and manage attendance with precision and ease.     </p>                 
+         <p class="about-text">   By replacing traditional manual registers with a secure digital platform, EduTrack Pro ensures real-time attendance tracking, improved accuracy, and transparent academic records for institutions of all sizes.  </p>
+         <ul class="about-list">                    
+             <li>
+             <i class="fas fa-check-circle"></i> Real-time student attendance tracking</li>                       
+              <li><i class="fas fa-check-circle"></i> Role-based dashboards for Admin, Teacher & Student</li>                       
+               <li><i class="fas fa-check-circle"></i> Automated reports and attendance analytics</li>                        
+               <li><i class="fas fa-check-circle"></i> Secure, scalable, cloud-ready system</li>                    
+               </ul>                
+               </div>                
+               <div class="col-lg-6">                    
+               <div class="row">                        
+               <div class="col-md-6 mb-4">                            
+               <div class="about-card">                                
+               <div class="about-icon">                                    
+               <i class="fas fa-bullseye"></i>                               
+                </div>                                
+                <h5>Our Mission</h5>                                
+                <p>To modernize attendance management through intelligent automation and accurate data tracking.</p>                            
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card fade-in-up" style="animation-delay: 0.1s;">
-                        <div class="stat-icon">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                        </div>
-                        <div class="stat-number">1,250+</div>
-                        <div class="stat-label">Faculty Members</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card fade-in-up" style="animation-delay: 0.2s;">
-                        <div class="stat-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-                        <div class="stat-number">250+</div>
-                        <div class="stat-label">Institutions</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card fade-in-up" style="animation-delay: 0.3s;">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-number">99.7%</div>
-                        <div class="stat-label">Accuracy Rate</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Features Section -->
+</div>                       
+ <div class="col-md-6 mb-4">                          
+   <div class="about-card">                               
+    <div class="about-icon">                                  
+      <i class="fas fa-eye"></i>                              
+        </div>                            
+            <h5>Our Vision</h5>                            
+                <p>To empower educational institutions with technology-driven academic management solutions.</p>                         
+                   </div>                    
+                   
+                       </div>                 
+                          </div>               
+                           </div>    
+                                  
+                                 </div>      
+                                    </div> 
+                                       </section>
     <!-- Features Section -->
 <section id="features" class="features-section">
     <div class="container">
@@ -203,8 +195,7 @@
         <div class="container">
             <h2 class="cta-title">Ready to Transform Your Institution?</h2>
             <p class="cta-subtitle">
-                Join hundreds of educational institutions already using EduTrack Pro to 
-                streamline their attendance management and improve academic outcomes.
+                Our platform is specifically designed for schools, colleges, and universities seeking a modern, efficient, and secure attendance solution. Experience seamless attendance tracking with real-time analytics and comprehensive reporting capabilities.
             </p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
                
@@ -266,11 +257,11 @@
                         <ul class="list-unstyled">
                             <li class="mb-3">
                                 <i class="fas fa-map-marker-alt me-2"></i>
-                                123 University Avenue, Edu City 56789
+                               Mumbai
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-phone me-2"></i>
-                                +1 (555) 123-4567
+                                +91 (810) 401-1403
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-envelope me-2"></i>

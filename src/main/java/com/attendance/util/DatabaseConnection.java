@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/attendance_db";
-    private static final String USERNAME = "root"; // Change if needed
-    private static final String PASSWORD = "shravani"; // Set your MySQL password
+    private static final String USERNAME = "root"; 
+    private static final String PASSWORD = "shravani"; 
     
     static {
         try {
@@ -36,11 +36,11 @@ public class DatabaseConnection {
         try {
             Connection conn = getConnection();
             if (conn != null && !conn.isClosed()) {
-                System.out.println("✅ Database connection test successful!");
+                System.out.println(" Database connection test successful!");
                 conn.close();
             }
         } catch (SQLException e) {
-            System.err.println("❌ Database connection test failed: " + e.getMessage());
+            System.err.println(" Database connection test failed: " + e.getMessage());
         }
     }
 }

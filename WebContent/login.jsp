@@ -26,11 +26,10 @@
                     EduTrack Pro
                 </div>
                 
-                <h1 class="welcome-title">Welcome Back</h1>
+                <h1 class="welcome-title">Authorized Access Portal</h1>
                 
                 <p class="welcome-subtitle">
-                    Sign in to access your personalized dashboard and manage student attendance 
-                    with our powerful analytics and reporting tools.
+                    This is a secure portal for registered institutional members only. Sign in with your authorized credentials to access your role-specific dashboard and attendance management tools.
                 </p>
                 
                 <ul class="features-list">
@@ -39,7 +38,15 @@
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <div>
-                            <strong>Secure Authentication:</strong> Bank-level encryption and secure login
+                           <strong>Secure Authentication:</strong> Protected access for verified members only
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon">
+                            <i class="fas fa-user-lock"></i>
+                        </div>
+                        <div>
+                            <strong>Role-Based Access:</strong> Students, Teachers & Administrators
                         </div>
                     </li>
                     <li>
@@ -52,9 +59,11 @@
                     </li>
                 </ul>
                 
+              
                 <div class="testimonial">
                     <p class="testimonial-text">
-                        "EduTrack Pro has simplified our attendance management. The interface is intuitive and reports are generated automatically."
+                        <i class="fas fa-lock me-2"></i>
+                        <strong>Access Restricted:</strong> Only authorized institutional members with valid credentials can access this system. Contact your administrator for account registration.
                     </p>
                 </div>
             </div>
