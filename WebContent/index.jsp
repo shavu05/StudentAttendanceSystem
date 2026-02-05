@@ -287,7 +287,7 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small>MCA Project by Shravani & Sanika  </small>
+                    <small>MCA Project by Shravani  </small>
                 </div>
             </div>
         </div>
