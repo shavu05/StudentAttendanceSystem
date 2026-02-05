@@ -822,7 +822,7 @@
 <!-- Footer -->
 <div class="credit-badge">
     <i class="fas fa-user-graduate"></i>
-    <span>Created by <strong>Shravani  & Sanika</strong></span>
+    <span>Created by <strong>Shravani  </strong></span>
 </div>
 
 
